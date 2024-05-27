@@ -42,10 +42,6 @@ class App(object):
         self.stopbutton = tk.Button(self.controlframe, text='Pause')
         self.stopbutton.grid(column=0, row = 2)
         
-        x = y = 50
-        points = [x, y, x+20, y, x+20, y+20, x, y+20]
-        self.canvas.create_polygon(points, outline='blue', fill='green', width=3)
-        
         self.mainframe.pack()
         logging.info('Init UI components - done.')
 

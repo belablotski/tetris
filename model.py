@@ -97,6 +97,7 @@ class Cell(object):
     def __eq__(self, value: object) -> bool:
         if isinstance(value, Cell):
             c: Cell = value
+            #logging.trace(f'Comparing {self} to {c}')
             return self.__col == c.get_col() and self.__row == c.get_row() and self.__style == c.get_style()
         else:
             raise ValueError(f'Cell object can be compared only to the same type object.')
@@ -148,10 +149,7 @@ class FigureRendering(RenderingBase):
 
     def to_cells(self) -> list[Cell]:
         cell_coords = self.__figure.get_current_projection().get_cells_coords()
-        logging.debug(cell_coords)
-        cells = [Cell(self.__row + r, self.__col + c, self.__style) for (r, c) in cell_coords]
-        logging.debug(cells)
-        return cells
+        return [Cell(self.__row + r, self.__col + c, self.__style) for (r, c) in cell_coords]
 
 class Board(object):
     def __init__(self, cols: int, rows: int) -> None:

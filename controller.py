@@ -44,6 +44,7 @@ class Controller(object):
 
     def drop(self) -> None:
         logging.debug('Drop')
+        self.__figure_rendering.move_down()
         self.__refresh_display()
 
     def push_down(self) -> None:
