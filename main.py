@@ -1,16 +1,23 @@
 import sys, logging
 import tkinter as tk
 
+from controller import Controller
+from view import CellRenderer
+
 class App(object):
     def __init__(self, root: tk.Tk) -> None:
         super().__init__()
+        self.root = root
+        self.__init_ui()
+        self.__init_mvc()
 
+    def __init_ui(self) -> None:
         self.__win_width = 800
         self.__win_height = 800
         self.__gameframe_width = 600
         self.__gameframe_height = self.__win_height
 
-        self.root = root
+        logging.info('Init UI components...')
         self.root.title('Tetris 0.1')
         self.root.geometry(f'{self.__win_width}x{self.__win_height}')
         self.mainframe = tk.Frame(self.root, width=self.__win_width, height=self.__win_height)
@@ -40,6 +47,29 @@ class App(object):
         self.canvas.create_polygon(points, outline='blue', fill='green', width=3)
         
         self.mainframe.pack()
+        logging.info('Init UI components - done.')
+
+    def __push_down_timer(self):
+        self.__ctr.push_down()
+        self.root.after(self.__ctr.get_push_down_interval_ms(), self.__push_down_timer)
+
+    def __init_mvc(self) -> None:
+        logging.info('Init MVC components...')
+        
+        # View
+        cell_renderer = CellRenderer(self.canvas)
+
+        # Controller
+        self.__ctr = Controller(cell_renderer)
+        self.root.bind("<Right>", lambda event: self.__ctr.move_right())
+        self.root.bind("<Left>", lambda event: self.__ctr.move_left())
+        self.root.bind("<Up>", lambda event: self.__ctr.rotate_clockwise())
+        self.root.bind("<Down>", lambda event: self.__ctr.rotate_counterclockwise())
+        self.root.bind("<space>", lambda event: self.__ctr.drop())
+        self.__ctr.next_figure()
+
+        self.root.after(self.__ctr.get_push_down_interval_ms(), self.__push_down_timer)
+        logging.info('Init MVC components - done.')
 
     def run(self):
         logging.info('Entering mainloop...')
@@ -59,4 +89,3 @@ if __name__ == "__main__":
     app.run()
     
     logging.info('Goodbye!')
-    
