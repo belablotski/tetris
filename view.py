@@ -1,6 +1,22 @@
-import logging
+import logging, random
 import tkinter as tk
 from model import Cell
+
+class CellStyles(object):
+    STYLES = [
+        ('yellow', 'green'),
+        ('lightgreen', 'blue'),
+        ('steelblue', 'violet'),
+        ('coral3', 'gold4'),
+    ]
+
+    @classmethod
+    def get_random_style_idx(cls) -> int:
+        return random.randrange(len(cls.STYLES))
+    
+    @classmethod
+    def get_style(cls, style_idx: int) -> tuple[str, str]:
+        return cls.STYLES[style_idx]
 
 class CellRenderer(object):
     CELL_SIZE_PX = 30
@@ -39,7 +55,8 @@ class CellRenderer(object):
         return [x, y, x+d-m, y, x+d-m, y+d-m, x, y+d-m]
         
     def __render_cell(self, cell: Cell) -> None:
-        self.__canvas.create_polygon(self.__calc_cell_polygon(cell), outline='green', fill='yellow', width=3)
+        (fill, outline) = CellStyles.get_style(cell.get_style_idx())
+        self.__canvas.create_polygon(self.__calc_cell_polygon(cell), outline=outline, fill=fill, width=3)
 
     def __erase_cell(self, cell: Cell) -> None:
         bg = self.__canvas['background']

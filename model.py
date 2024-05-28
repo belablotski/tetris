@@ -94,11 +94,11 @@ class FiguresManager(object):
 
 class Cell(object):
     """Represents a cell on the board. This is a bridge model to straigh the interfacing with the View."""
-    def __init__(self, row: int, col: int, style: int) -> None:
+    def __init__(self, row: int, col: int, style_idx: int) -> None:
         super().__init__()
         self.__col = col
         self.__row = row
-        self.__style = style
+        self.__style_idx = style_idx
 
     def get_col(self) -> int:
         return self.__col
@@ -106,17 +106,17 @@ class Cell(object):
     def get_row(self) -> int:
         return self.__row
     
-    def get_style(self) -> int:
-        return self.__style
+    def get_style_idx(self) -> int:
+        return self.__style_idx
     
     def __repr__(self) -> str:
-        return f'Cell({self.__row}, {self.__col}, {self.__style})'
+        return f'Cell({self.__row}, {self.__col}, {self.__style_idx})'
     
     def __eq__(self, value: object) -> bool:
         if isinstance(value, Cell):
             c: Cell = value
             #logging.trace(f'Comparing {self} to {c}')
-            return self.__col == c.get_col() and self.__row == c.get_row() and self.__style == c.get_style()
+            return self.__col == c.get_col() and self.__row == c.get_row() and self.__style_idx == c.get_style_idx()
         else:
             raise ValueError(f'Cell object can be compared only to the same type object.')
 
@@ -128,12 +128,12 @@ class RenderingBase(object):
         pass
 
 class FigureRendering(RenderingBase):
-    def __init__(self, figure: Figure) -> None:
+    def __init__(self, figure: Figure, style_idx: int) -> None:
         super().__init__()
         self.__figure = figure
         self.__col = 5
         self.__row = 0
-        self.__style = 0
+        self.__style_idx = style_idx
 
     def get_col(self) -> int:
         return self.__col
@@ -169,7 +169,7 @@ class FigureRendering(RenderingBase):
 
     def to_cells(self) -> list[Cell]:
         cell_coords = self.__figure.get_current_projection().get_cells_coords()
-        return [Cell(self.__row + r, self.__col + c, self.__style) for (r, c) in cell_coords]
+        return [Cell(self.__row + r, self.__col + c, self.__style_idx) for (r, c) in cell_coords]
 
 class Board(object):
     def __init__(self, cols: int, rows: int) -> None:
