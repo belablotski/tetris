@@ -64,6 +64,24 @@ class FiguresManager(object):
                 FigureProjection([
                 [True, False],
                 [True, True]])
+        ], 0),
+        Figure([
+            FigureProjection([
+                [True, True, False],
+                [False, True, True]]),
+            FigureProjection([
+                [False, True],
+                [True, True],
+                [True, False]])
+        ], 0),
+        Figure([
+            FigureProjection([
+                [False, True, True],
+                [True, True, False]]),
+            FigureProjection([
+                [True, False],
+                [True, True],
+                [False, True]])
         ], 0)
     ]
 
@@ -138,6 +156,8 @@ class FigureRendering(RenderingBase):
     def move_down(self) -> None:
         if self.__row < 20:
             self.__row += 1
+        else:
+            raise InvalidMoveException(f'Row can not be more than 20.')
 
     def rotate_clockwise(self) -> None:
         logging.debug(self.__figure)

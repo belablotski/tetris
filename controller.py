@@ -42,15 +42,21 @@ class Controller(object):
         self.__figure_rendering.rotate_counterclockwise()
         self.__refresh_display()
 
+    def __go_down(self):
+        try:
+            self.__figure_rendering.move_down()
+            self.__refresh_display()
+        except InvalidMoveException as e:
+            logging.debug(f'Blocking move down: {e}')
+            self.next_figure()
+
     def drop(self) -> None:
         logging.debug('Drop')
-        self.__figure_rendering.move_down()
-        self.__refresh_display()
+        self.__go_down()
 
     def push_down(self) -> None:
         logging.debug('Push-down')
-        self.__figure_rendering.move_down()
-        self.__refresh_display()
+        self.__go_down()
 
     def next_figure(self) -> None:
         figure = FiguresManager.get_random()
