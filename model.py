@@ -27,12 +27,13 @@ class FigureProjection(object):
         return res
     
     def get_footprint_cells_coords(self) -> list[tuple[int, int]]:
-        res = [sys.maxsize] * len(self.__layout[0])
-        for i in range(len(self.__layout)-1, -1, -1):
-            for j in range(len(self.__layout[i])):
-                if self.__layout[i][j]:
-                    res.append((i, j))
-        return res
+        res = [(sys.maxsize, sys.maxsize)] * len(self.__layout[0])
+        for c in range(len(self.__layout[0])):
+            for r in range(len(self.__layout)-1, -1, -1):
+                if self.__layout[r][c]:
+                    res.append((r, c))
+                    break
+        return [(r, c) for (r, c) in res if r < sys.maxsize]
 
 class Figure(object):
     def __init__(self, projections: list[FigureProjection], current_projection: int) -> None:
@@ -59,7 +60,7 @@ class Figure(object):
             self.__current_projection = 0
 
 class FiguresManager(object):
-    figures = [
+    FIGURES = [
         Figure([
             FigureProjection([
                 [True, True],
@@ -105,7 +106,7 @@ class FiguresManager(object):
 
     @classmethod
     def get_random(cls) -> Figure:
-        fig = random.choice(cls.figures)
+        fig = random.choice(cls.FIGURES)
         for i in range(random.randrange(fig.get_projection_count())):
             fig.rotate_clockwise()
         return fig
@@ -203,4 +204,26 @@ class Board(object):
 class BoardRendering(object):
     def __init__(self) -> None:
         super().__init__()
-        
+
+if __name__ == '__main__':
+    # TODO: move tests into a proper place
+    footprints = [
+        ([(0, 0), (0, 1), (1, 0)], [(1, 0), (0, 1)]),
+        ([(0, 0), (0, 1), (1, 1)], [(0, 0), (1, 1)]),
+        ([(0, 0), (1, 0), (1, 1)], [(1, 0), (1, 1)]),
+        ([(0, 1), (1, 0), (1, 1)], [(1, 0), (1, 1)]),
+        ([(0, 0), (0, 1), (1, 1), (1, 2)], [(0, 0), (1, 1), (1, 2)]),
+        ([(0, 1), (1, 0), (1, 1), (2, 0)], [(2, 0), (1, 1)]),
+        ([(0, 1), (0, 2), (1, 0), (1, 1)], [(1, 0), (1, 1), (0, 2)]),
+        ([(0, 0), (1, 0), (1, 1), (2, 1)], [(1, 0), (2, 1)]),
+        ([(0, 0), (0, 1), (0, 2), (0, 3)], [(0, 0), (0, 1), (0, 2), (0, 3)]),
+        ([(0, 1), (1, 1), (2, 1), (3, 1)], [(3, 1)]),
+    ]
+
+    for figure in FiguresManager.FIGURES:
+        for pi in range(figure.get_projection_count()):
+            projection = figure.get_current_projection().get_cells_coords()
+            footprint = figure.get_current_projection().get_footprint_cells_coords()
+            if footprints.count((projection, footprint)) != 1:
+                print(f'Test failed for projection = {projection} and footprint = {footprint}')
+            figure.rotate_clockwise()
