@@ -2,7 +2,7 @@ import sys, logging
 import tkinter as tk
 
 from controller import Controller
-from view import CellRenderer
+from view import CellRenderer, BoardRenderer
 
 class App(object):
     def __init__(self, root: tk.Tk) -> None:
@@ -12,9 +12,9 @@ class App(object):
         self.__init_mvc()
 
     def __init_ui(self) -> None:
-        self.__win_width = 800
-        self.__win_height = 800
-        self.__gameframe_width = 600
+        self.__win_width = BoardRenderer.CANVAS_WIDTH + 200
+        self.__win_height = BoardRenderer.CANVAS_HEIGHT
+        self.__gameframe_width = BoardRenderer.CANVAS_WIDTH
         self.__gameframe_height = self.__win_height
 
         logging.info('Init UI components...')

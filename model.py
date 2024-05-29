@@ -1,5 +1,6 @@
 import logging
 import random
+import sys
 
 class ModelException(Exception):
     def __init__(self, *args: object) -> None:
@@ -20,6 +21,14 @@ class FigureProjection(object):
     def get_cells_coords(self) -> list[tuple[int, int]]:
         res = []
         for i in range(len(self.__layout)):
+            for j in range(len(self.__layout[i])):
+                if self.__layout[i][j]:
+                    res.append((i, j))
+        return res
+    
+    def get_footprint_cells_coords(self) -> list[tuple[int, int]]:
+        res = [sys.maxsize] * len(self.__layout[0])
+        for i in range(len(self.__layout)-1, -1, -1):
             for j in range(len(self.__layout[i])):
                 if self.__layout[i][j]:
                     res.append((i, j))
@@ -82,6 +91,15 @@ class FiguresManager(object):
                 [True, False],
                 [True, True],
                 [False, True]])
+        ], 0),
+        Figure([
+            FigureProjection([
+                [True, True, True, True]]),
+            FigureProjection([
+                [False, True],
+                [False, True],
+                [False, True],
+                [False, True]])
         ], 0)
     ]
 
@@ -131,7 +149,7 @@ class FigureRendering(RenderingBase):
     def __init__(self, figure: Figure, style_idx: int) -> None:
         super().__init__()
         self.__figure = figure
-        self.__col = 5
+        self.__col = (Board.COLS - len(figure.get_current_projection().get_layout()[0])) / 2    # where figure appears
         self.__row = 0
         self.__style_idx = style_idx
 
@@ -148,16 +166,16 @@ class FigureRendering(RenderingBase):
             raise InvalidMoveException(f'Column can not be less than 0.')
 
     def move_right(self) -> None:
-        if self.__col < 10:
+        if self.__col < Board.COLS:
             self.__col += 1
         else:
-            raise InvalidMoveException(f'Column can not be more than 10 or equal.')
+            raise InvalidMoveException(f'Column can not be more than {Board.COLS} or equal.')
 
     def move_down(self) -> None:
-        if self.__row < 20:
+        if self.__row < Board.ROWS:
             self.__row += 1
         else:
-            raise InvalidMoveException(f'Row can not be more than 20.')
+            raise InvalidMoveException(f'Row can not be more than {Board.ROWS}.')
 
     def rotate_clockwise(self) -> None:
         logging.debug(self.__figure)
@@ -172,7 +190,17 @@ class FigureRendering(RenderingBase):
         return [Cell(self.__row + r, self.__col + c, self.__style_idx) for (r, c) in cell_coords]
 
 class Board(object):
-    def __init__(self, cols: int, rows: int) -> None:
+    COLS = 12
+    ROWS = 25
+
+    def __init__(self) -> None:
         super().__init__()
-        self.__cols = cols
-        self.__rows = rows
+        self.__cells = []
+
+    def get_cells(self) -> list[Cell]:
+        return self.__cells
+
+class BoardRendering(object):
+    def __init__(self) -> None:
+        super().__init__()
+        

@@ -1,6 +1,6 @@
 import logging, random
 import tkinter as tk
-from model import Cell
+from model import Cell, Board
 
 class CellStyles(object):
     STYLES = [
@@ -75,3 +75,10 @@ class CellRenderer(object):
         for cell in cells_to_put:
             self.__prev_cells.append(cell)
             self.__render_cell(cell)
+
+class BoardRenderer(object):
+    CANVAS_WIDTH = Board.COLS * CellRenderer.CELL_SIZE_PX
+    CANVAS_HEIGHT = Board.ROWS * CellRenderer.CELL_SIZE_PX
+
+    def __init__(self) -> None:
+        super().__init__()

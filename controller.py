@@ -63,3 +63,4 @@ class Controller(object):
         logging.info(f'New figure {figure}: {figure.get_current_projection()}')
         self.__figure_rendering = FigureRendering(figure, CellStyles.get_random_style_idx())
         self.__refresh_display()
+    
