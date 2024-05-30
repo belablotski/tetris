@@ -1,12 +1,13 @@
 import logging
 
-from model import FiguresManager, FigureRendering, InvalidMoveException
+from model import Board, FiguresManager, FigureRendering, InvalidMoveException
 from view import CellRenderer, CellStyles
 
 class Controller(object):
-    def __init__(self, cell_renderer: CellRenderer) -> None:
+    def __init__(self, board: Board, cell_renderer: CellRenderer) -> None:
         super().__init__()
         self.__push_down_interval_ms = 1000
+        self.__board = board
         self.__figure_rendering: FigureRendering = None
         self.__cell_renderer = cell_renderer
 
@@ -61,6 +62,6 @@ class Controller(object):
     def next_figure(self) -> None:
         figure = FiguresManager.get_random()
         logging.info(f'New figure {figure}: {figure.get_current_projection()}')
-        self.__figure_rendering = FigureRendering(figure, CellStyles.get_random_style_idx())
+        self.__figure_rendering = FigureRendering(self.__board, figure, CellStyles.get_random_style_idx())
         self.__refresh_display()
     

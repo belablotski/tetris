@@ -146,9 +146,32 @@ class RenderingBase(object):
     def to_cells(self) -> list[Cell]:
         pass
 
-class FigureRendering(RenderingBase):
-    def __init__(self, figure: Figure, style_idx: int) -> None:
+class Board(object):
+    COLS = 12
+    ROWS = 25
+
+    def __init__(self) -> None:
         super().__init__()
+        self.__cells = []
+
+    def get_cells(self) -> list[Cell]:
+        return self.__cells
+    
+    def is_cell_occupied(self, row, col) -> bool:
+        return False
+
+    def check_footprint_fit(self, figure: Figure, row: int, col: int) -> bool:
+        rel_coords = figure.get_current_projection().get_footprint_cells_coords()
+        abs_coords = [(r + row, c + col) for (r, c) in rel_coords]
+        if len([r for (r, c) in abs_coords if r >= self.ROWS]) > 0:
+            return False
+        cells_empty = [not self.is_cell_occupied(r, c) for (r, c) in abs_coords]
+        return all(cells_empty)
+
+class FigureRendering(RenderingBase):
+    def __init__(self, board: Board, figure: Figure, style_idx: int) -> None:
+        super().__init__()
+        self.__board = board
         self.__figure = figure
         self.__col = (Board.COLS - len(figure.get_current_projection().get_layout()[0])) / 2    # where figure appears
         self.__row = 0
@@ -173,10 +196,10 @@ class FigureRendering(RenderingBase):
             raise InvalidMoveException(f'Column can not be more than {Board.COLS} or equal.')
 
     def move_down(self) -> None:
-        if self.__row < Board.ROWS:
+        if self.__board.check_footprint_fit(self.__figure, self.__row + 1, self.__col):
             self.__row += 1
         else:
-            raise InvalidMoveException(f'Row can not be more than {Board.ROWS}.')
+            raise InvalidMoveException(f'Footprint check failed.')
 
     def rotate_clockwise(self) -> None:
         logging.debug(self.__figure)
@@ -190,20 +213,6 @@ class FigureRendering(RenderingBase):
         cell_coords = self.__figure.get_current_projection().get_cells_coords()
         return [Cell(self.__row + r, self.__col + c, self.__style_idx) for (r, c) in cell_coords]
 
-class Board(object):
-    COLS = 12
-    ROWS = 25
-
-    def __init__(self) -> None:
-        super().__init__()
-        self.__cells = []
-
-    def get_cells(self) -> list[Cell]:
-        return self.__cells
-
-class BoardRendering(object):
-    def __init__(self) -> None:
-        super().__init__()
 
 if __name__ == '__main__':
     # TODO: move tests into a proper place

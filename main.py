@@ -1,8 +1,9 @@
 import sys, logging
 import tkinter as tk
 
-from controller import Controller
+from model import Board
 from view import CellRenderer, BoardRenderer
+from controller import Controller
 
 class App(object):
     def __init__(self, root: tk.Tk) -> None:
@@ -52,11 +53,14 @@ class App(object):
     def __init_mvc(self) -> None:
         logging.info('Init MVC components...')
         
+        # Model
+        board = Board()
+
         # View
         cell_renderer = CellRenderer(self.canvas)
 
         # Controller
-        self.__ctr = Controller(cell_renderer)
+        self.__ctr = Controller(board, cell_renderer)
         self.root.bind("<Right>", lambda event: self.__ctr.move_right())
         self.root.bind("<Left>", lambda event: self.__ctr.move_left())
         self.root.bind("<Up>", lambda event: self.__ctr.rotate_clockwise())
