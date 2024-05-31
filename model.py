@@ -144,7 +144,7 @@ class RenderingBase(object):
         super().__init__()
 
     def to_cells(self) -> list[Cell]:
-        pass
+        raise NotImplemented()
 
 class Board(object):
     COLS = 12
@@ -167,13 +167,17 @@ class Board(object):
             return False
         cells_empty = [not self.is_cell_occupied(r, c) for (r, c) in abs_coords]
         return all(cells_empty)
+    
+    def figure_final_placement(self, cells: list[Cell]) -> None:
+        self.__cells.extend(cells)
+        logging.debug(f'New board state {self.__cells}')
 
 class FigureRendering(RenderingBase):
     def __init__(self, board: Board, figure: Figure, style_idx: int) -> None:
         super().__init__()
         self.__board = board
         self.__figure = figure
-        self.__col = (Board.COLS - len(figure.get_current_projection().get_layout()[0])) / 2    # where figure appears
+        self.__col = (Board.COLS - len(figure.get_current_projection().get_layout()[0])) / 2    # where a figure appears
         self.__row = 0
         self.__style_idx = style_idx
 

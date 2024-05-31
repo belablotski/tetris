@@ -48,11 +48,11 @@ class CellRenderer(object):
         return (cells_to_put, cells_to_remove)
 
     def __calc_cell_polygon(self, cell: Cell) -> list[int]:
-        d = self.CELL_SIZE_PX
-        m = 3
-        x = cell.get_col() * d
-        y = cell.get_row() * d
-        return [x, y, x+d-m, y, x+d-m, y+d-m, x, y+d-m]
+        sz = self.CELL_SIZE_PX
+        margin = 3
+        x = cell.get_col() * sz
+        y = cell.get_row() * sz
+        return [x, y, x+sz-margin, y, x+sz-margin, y+sz-margin, x, y+sz-margin]
         
     def __render_cell(self, cell: Cell) -> None:
         (fill, outline) = CellStyles.get_style(cell.get_style_idx())
@@ -62,6 +62,9 @@ class CellRenderer(object):
         bg = self.__canvas['background']
         self.__canvas.create_polygon(self.__calc_cell_polygon(cell), outline=bg, fill=bg, width=3)
 
+    def reset(self) -> None:
+        self.__prev_cells = []
+    
     def display(self, cells: list[Cell]) -> None:
         (cells_to_put, cells_to_remove) = self.__get_changed_cells(cells)
         logging.debug(f'Previous cells: {self.__prev_cells}')
@@ -76,9 +79,9 @@ class CellRenderer(object):
             self.__prev_cells.append(cell)
             self.__render_cell(cell)
 
-class BoardRenderer(object):
+class BoardRenderer(CellRenderer):
     CANVAS_WIDTH = Board.COLS * CellRenderer.CELL_SIZE_PX
     CANVAS_HEIGHT = Board.ROWS * CellRenderer.CELL_SIZE_PX
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, canvas: tk.Canvas) -> None:
+        super().__init__(canvas)

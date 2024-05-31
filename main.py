@@ -58,15 +58,16 @@ class App(object):
 
         # View
         cell_renderer = CellRenderer(self.canvas)
+        board_renderer = BoardRenderer(self.canvas)
 
         # Controller
-        self.__ctr = Controller(board, cell_renderer)
+        self.__ctr = Controller(board, cell_renderer, board_renderer)
         self.root.bind("<Right>", lambda event: self.__ctr.move_right())
         self.root.bind("<Left>", lambda event: self.__ctr.move_left())
         self.root.bind("<Up>", lambda event: self.__ctr.rotate_clockwise())
         self.root.bind("<Down>", lambda event: self.__ctr.rotate_counterclockwise())
         self.root.bind("<space>", lambda event: self.__ctr.drop())
-        self.__ctr.next_figure()
+        self.__ctr.start_game()
 
         self.root.after(self.__ctr.get_push_down_interval_ms(), self.__push_down_timer)
         logging.info('Init MVC components - done.')
