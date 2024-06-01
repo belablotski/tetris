@@ -28,6 +28,7 @@ class FigureProjection(object):
                     res.append((i, j))
         return res
     
+    #@DeprecationWarning
     def get_footprint_cells_coords(self) -> list[tuple[int, int]]:
         res = [(sys.maxsize, sys.maxsize)] * len(self.__layout[0])
         for c in range(len(self.__layout[0])):
@@ -37,6 +38,7 @@ class FigureProjection(object):
                     break
         return [(r, c) for (r, c) in res if r < sys.maxsize]
     
+    #@DeprecationWarning()
     def get_leftsideprint_cells_coords(self) -> list[tuple[int, int]]:
         res = []
         for r in range(len(self.__layout)):
@@ -173,6 +175,7 @@ class Board(object):
         # TODO: Optimize - some sort of topology-based index is needed
         return next((c for c in self.__cells if c.get_row() == row and c.get_col() == col), None) is not None
 
+    #@DeprecationWarning
     def check_footprint_fit(self, figure: Figure, row: int, col: int) -> bool:
         rel_coords = figure.get_current_projection().get_footprint_cells_coords()
         abs_coords = [(r + row, c + col) for (r, c) in rel_coords]
@@ -181,6 +184,14 @@ class Board(object):
         cells_empty = [not self.is_cell_occupied(r, c) for (r, c) in abs_coords]
         return all(cells_empty)
     
+    def check_fit(self, figure: Figure, row: int, col: int) -> bool:
+        rel_coords = figure.get_current_projection().get_cells_coords()
+        abs_coords = [(r + row, c + col) for (r, c) in rel_coords]
+        if not all([0 <= r < self.ROWS and 0 <= c < self.COLS for (r, c) in abs_coords]):
+            return False
+        target_cells_empty = [not self.is_cell_occupied(r, c) for (r, c) in abs_coords]
+        return all(target_cells_empty)
+
     def figure_final_placement(self, cells: list[Cell]) -> None:
         self.__cells.extend(cells)
         logging.debug(f'New board state {self.__cells}')
@@ -201,22 +212,22 @@ class FigureRendering(RenderingBase):
         return self.__row
     
     def move_left(self) -> None:
-        if self.__col > 0:
+        if self.__board.check_fit(self.__figure, self.__row, self.__col - 1):
             self.__col -= 1
         else:
-            raise InvalidMoveException(f'Column can not be less than 0.')
+            raise InvalidMoveException(f'Figure does not fit if moved left.')
 
     def move_right(self) -> None:
-        if self.__col < Board.COLS:
+        if self.__board.check_fit(self.__figure, self.__row, self.__col + 1):
             self.__col += 1
         else:
-            raise InvalidMoveException(f'Column can not be more than {Board.COLS} or equal.')
+            raise InvalidMoveException(f'Figure does not fit if moved right.')
 
     def move_down(self) -> None:
-        if self.__board.check_footprint_fit(self.__figure, self.__row + 1, self.__col):
+        if self.__board.check_fit(self.__figure, self.__row + 1, self.__col):
             self.__row += 1
         else:
-            raise InvalidMoveException(f'Footprint check failed.')
+            raise InvalidMoveException(f'Figure does not fit if moved down.')
 
     def rotate_clockwise(self) -> None:
         logging.debug(self.__figure)
