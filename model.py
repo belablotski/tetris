@@ -18,6 +18,8 @@ class FigureProjection(object):
     def get_layout(self) -> list[list[bool]]:
         return self.__layout
     
+    # TODO: Cache all these methods
+
     def get_cells_coords(self) -> list[tuple[int, int]]:
         res = []
         for i in range(len(self.__layout)):
@@ -34,6 +36,16 @@ class FigureProjection(object):
                     res.append((r, c))
                     break
         return [(r, c) for (r, c) in res if r < sys.maxsize]
+    
+    def get_leftsideprint_cells_coords(self) -> list[tuple[int, int]]:
+        res = []
+        for r in range(len(self.__layout)):
+            try:
+                c = self.__layout[r].index(True)
+                res.append((r, c))
+            except ValueError:
+                pass
+        return res
 
 class Figure(object):
     def __init__(self, projections: list[FigureProjection], current_projection: int) -> None:
@@ -106,10 +118,10 @@ class FiguresManager(object):
 
     @classmethod
     def get_random(cls) -> Figure:
-        fig = random.choice(cls.FIGURES)
-        for i in range(random.randrange(fig.get_projection_count())):
-            fig.rotate_clockwise()
-        return fig
+        figure = random.choice(cls.FIGURES)
+        for _ in range(random.randrange(figure.get_projection_count())):
+            figure.rotate_clockwise()
+        return figure
 
 class Cell(object):
     """Represents a cell on the board. This is a bridge model to straigh the interfacing with the View."""
@@ -152,18 +164,19 @@ class Board(object):
 
     def __init__(self) -> None:
         super().__init__()
-        self.__cells = []
+        self.__cells: list[Cell] = []
 
     def get_cells(self) -> list[Cell]:
         return self.__cells
     
     def is_cell_occupied(self, row, col) -> bool:
-        return False
+        # TODO: Optimize - some sort of topology-based index is needed
+        return next((c for c in self.__cells if c.get_row() == row and c.get_col() == col), None) is not None
 
     def check_footprint_fit(self, figure: Figure, row: int, col: int) -> bool:
         rel_coords = figure.get_current_projection().get_footprint_cells_coords()
         abs_coords = [(r + row, c + col) for (r, c) in rel_coords]
-        if len([r for (r, c) in abs_coords if r >= self.ROWS]) > 0:
+        if next((r for (r, c) in abs_coords if r >= self.ROWS), None):
             return False
         cells_empty = [not self.is_cell_occupied(r, c) for (r, c) in abs_coords]
         return all(cells_empty)
@@ -177,7 +190,7 @@ class FigureRendering(RenderingBase):
         super().__init__()
         self.__board = board
         self.__figure = figure
-        self.__col = (Board.COLS - len(figure.get_current_projection().get_layout()[0])) / 2    # where a figure appears
+        self.__col = int((Board.COLS - len(figure.get_current_projection().get_layout()[0])) / 2)    # where a figure appears
         self.__row = 0
         self.__style_idx = style_idx
 
@@ -233,10 +246,26 @@ if __name__ == '__main__':
         ([(0, 1), (1, 1), (2, 1), (3, 1)], [(3, 1)]),
     ]
 
+    leftsideprints = [
+        ([(0, 0), (0, 1), (1, 0)], [(0, 0), (1, 0)]),
+        ([(0, 0), (0, 1), (1, 1)], [(0, 0), (1, 1)]),
+        ([(0, 1), (1, 0), (1, 1)], [(0, 1), (1, 0)]),
+        ([(0, 0), (1, 0), (1, 1)], [(0, 0), (1, 0)]),
+        ([(0, 0), (0, 1), (1, 1), (1, 2)], [(0, 0), (1, 1)]),
+        ([(0, 1), (1, 0), (1, 1), (2, 0)], [(0, 1), (1, 0), (2, 0)]),
+        ([(0, 1), (0, 2), (1, 0), (1, 1)], [(0, 1), (1, 0)]),
+        ([(0, 0), (1, 0), (1, 1), (2, 1)], [(0, 0), (1, 0), (2, 1)]),
+        ([(0, 0), (0, 1), (0, 2), (0, 3)], [(0, 0)]),
+        ([(0, 1), (1, 1), (2, 1), (3, 1)], [(0, 1), (1, 1), (2, 1), (3, 1)]),
+    ]
+
     for figure in FiguresManager.FIGURES:
         for pi in range(figure.get_projection_count()):
             projection = figure.get_current_projection().get_cells_coords()
             footprint = figure.get_current_projection().get_footprint_cells_coords()
             if footprints.count((projection, footprint)) != 1:
                 print(f'Test failed for projection = {projection} and footprint = {footprint}')
+            leftsideprint = figure.get_current_projection().get_leftsideprint_cells_coords()
+            if leftsideprints.count((projection, leftsideprint)) != 1:
+                print(f'Test failed for projection = {projection} and leftsideprint = {leftsideprint}')
             figure.rotate_clockwise()
