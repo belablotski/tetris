@@ -19,6 +19,9 @@ class Controller(object):
         if self.__figure_rendering:
             logging.debug(f'Put figure on the board as cells {self.__figure_rendering.to_cells()}')
             self.__board.figure_final_placement(self.__figure_rendering.to_cells())
+            completed_rows = self.__board.get_completed_rows()
+            # TODO: It will be great to remove them one by one with some sort of animation.
+            self.__board.remove_rows(completed_rows)
             self.__board_renderer.display(self.__board.get_cells())
             self.__figure_renderer.reset()
         figure = FiguresManager.get_random()

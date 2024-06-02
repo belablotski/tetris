@@ -9,6 +9,10 @@ class InvalidMoveException(ModelException):
     def __init__(self, *args: object) -> None:
         super().__init__(*args)
 
+class GameOverException(ModelException):
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)
+
 class FigureProjection(object):
     def __init__(self, layout: list[list[bool]]) -> None:
         super().__init__() 
@@ -113,9 +117,9 @@ class FiguresManager(object):
                 [True, True, True],
                 [False, True, False]]),
             FigureProjection([
-                [False, True],
-                [True, True],
-                [False, True]])
+                [False, False, True],
+                [False, True, True],
+                [False, False, True]])
         ], 0),
     ]
 
@@ -140,6 +144,9 @@ class Cell(object):
     def get_row(self) -> int:
         return self.__row
     
+    def set_row(self, row: int) -> None:
+        self.__row = row
+    
     def get_style_idx(self) -> int:
         return self.__style_idx
     
@@ -158,12 +165,26 @@ class Board(object):
     COLS = 12
     ROWS = 25
 
-    def __init__(self) -> None:
+    def __init__(self, rows = 25, cols = 12, cells = []) -> None:
         super().__init__()
-        self.__cells: list[Cell] = []
+        self.__rows = rows
+        self.__cols = cols
+        self.__cells: list[Cell] = cells
+
+    def get_rows(self):
+        return self.__rows
+
+    def get_cols(self):
+        return self.__cols
 
     def get_cells(self) -> list[Cell]:
         return self.__cells
+    
+    def get_layout(self) -> list[list[bool]]:
+        result = [[False] * self.__cols for _ in range(self.__rows)]
+        for cell in self.__cells:
+            result[cell.get_row()][cell.get_col()] = True
+        return result
     
     def is_cell_occupied(self, row, col) -> bool:
         # TODO: Optimize - some sort of topology-based index is needed
@@ -172,7 +193,7 @@ class Board(object):
     def check_fit(self, figure: Figure, row: int, col: int) -> bool:
         rel_coords = figure.get_current_projection().get_cells_coords()
         abs_coords = [(r + row, c + col) for (r, c) in rel_coords]
-        if not all([0 <= r < self.ROWS and 0 <= c < self.COLS for (r, c) in abs_coords]):
+        if not all([0 <= r < self.__rows and 0 <= c < self.__cols for (r, c) in abs_coords]):
             return False
         target_cells_empty = [not self.is_cell_occupied(r, c) for (r, c) in abs_coords]
         return all(target_cells_empty)
@@ -181,14 +202,25 @@ class Board(object):
         self.__cells.extend(cells)
         logging.debug(f'New board state {self.__cells}')
 
+    def get_completed_rows(self) -> list[int]:
+        layout = self.get_layout()
+        return [row for row in range(len(layout)) if all(layout[row])]
+    
+    def remove_rows(self, rows: list[int]) -> None:
+        self.__cells = [cell for cell in self.__cells if cell.get_row() not in rows]
+        for cell in self.__cells:
+            cell.set_row(cell.get_row() + len([r for r in rows if cell.get_row() < r]))
+
 class FigureRendering(object):
     def __init__(self, board: Board, figure: Figure, style_idx: int) -> None:
         super().__init__()
         self.__board = board
         self.__figure = figure
-        self.__col = int((Board.COLS - len(figure.get_current_projection().get_layout()[0])) / 2)    # where a figure appears
+        self.__col = int((board.get_cols() - len(figure.get_current_projection().get_layout()[0])) / 2)    # where a figure appears
         self.__row = 0
         self.__style_idx = style_idx
+        if not self.__board.check_fit(self.__figure, self.__row, self.__col):
+            raise GameOverException(f'Impossible to put new figure on the board.')
 
     def get_col(self) -> int:
         return self.__col
@@ -231,3 +263,68 @@ class FigureRendering(object):
     def to_cells(self) -> list[Cell]:
         cell_coords = self.__figure.get_current_projection().get_cells_coords()
         return [Cell(self.__row + r, self.__col + c, self.__style_idx) for (r, c) in cell_coords]
+
+if __name__ == '__main__':
+    import copy
+
+    # TODO: move tests in a proper place
+    cells = [Cell(0, 0, 0),
+             Cell(1, 0, 0), Cell(1, 1, 0), Cell(1, 2, 0),
+             Cell(2, 0, 0), Cell(2, 1, 0), Cell(2, 2, 0),
+             Cell(3, 0, 0), Cell(3, 1, 0), Cell(3, 2, 0)]
+    board = Board(4, 3, copy.deepcopy(cells))
+    assert board.get_layout() == [[True, False, False], 
+                                  [True, True, True], 
+                                  [True, True, True], 
+                                  [True, True, True]]
+    assert board.get_completed_rows() == [1, 2, 3]
+
+    board.remove_rows([1, 2, 3])
+    assert board.get_layout() == [[False, False, False],
+                                  [False, False, False],
+                                  [False, False, False], 
+                                  [True, False, False]]
+    
+    board = Board(4, 3, copy.deepcopy(cells))
+    board.remove_rows([1])
+    assert board.get_layout() == [[False, False, False],
+                                  [True, False, False],
+                                  [True, True, True], 
+                                  [True, True, True]]
+    
+    board.remove_rows([3])
+    assert board.get_layout() == [[False, False, False],
+                                  [False, False, False],
+                                  [True, False, False],
+                                  [True, True, True]]
+    
+    board.remove_rows([3])
+    assert board.get_layout() == [[False, False, False],
+                                  [False, False, False],
+                                  [False, False, False],
+                                  [True, False, False]]
+    
+    board.remove_rows([3])
+    assert board.get_layout() == [[False, False, False],
+                                  [False, False, False],
+                                  [False, False, False],
+                                  [False, False, False]]
+
+    ###
+
+    cells = [Cell(0, 0, 0),
+             Cell(1, 0, 0), Cell(1, 1, 0), Cell(1, 2, 0), Cell(1, 3, 0),
+             Cell(2, 1, 0), Cell(2, 2, 0),
+             Cell(3, 3, 0), Cell(3, 2, 0), Cell(3, 1, 0), Cell(3, 0, 0)]
+    board = Board(4, 4, cells)
+    assert board.get_layout() == [[True, False, False, False], 
+                                  [True, True, True, True], 
+                                  [False, True, True, False], 
+                                  [True, True, True, True]]
+    assert board.get_completed_rows() == [1, 3]
+
+    board.remove_rows([1, 3])
+    assert board.get_layout() == [[False, False, False, False],
+                                  [False, False, False, False],
+                                  [True, False, False, False], 
+                                  [False, True, True, False]]
