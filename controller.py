@@ -47,13 +47,19 @@ class Controller(object):
 
     def rotate_clockwise(self) -> None:
         logging.debug('Rotate clockwise')
-        self.__figure_rendering.rotate_clockwise()
-        self.__refresh_display()
+        try:
+            self.__figure_rendering.rotate_clockwise()
+            self.__refresh_display()
+        except InvalidMoveException as e:
+            logging.debug(f'Blocking rotate clockwise: {e}')
 
     def rotate_counterclockwise(self) -> None:
         logging.debug('Rotate counterclockwise')
-        self.__figure_rendering.rotate_counterclockwise()
-        self.__refresh_display()
+        try:
+            self.__figure_rendering.rotate_counterclockwise()
+            self.__refresh_display()
+        except InvalidMoveException as e:
+            logging.debug(f'Blocking rotate counterclockwise: {e}')
 
     def __go_down(self):
         try:
@@ -61,7 +67,6 @@ class Controller(object):
             self.__refresh_display()
         except InvalidMoveException as e:
             logging.debug(f'Blocking move down: {e}')
-
             self.__next_figure()
 
     def drop(self) -> None:

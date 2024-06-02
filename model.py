@@ -232,6 +232,9 @@ class FigureRendering(RenderingBase):
     def rotate_clockwise(self) -> None:
         logging.debug(self.__figure)
         self.__figure.rotate_clockwise()
+        if not self.__board.check_fit(self.__figure, self.__row, self.__col):
+            self.__figure.rotate_counterclockwise()
+            raise InvalidMoveException(f'Figure does not fit if roteated clockwise.')
 
     def rotate_counterclockwise(self) -> None:
         logging.debug(self.__figure)
