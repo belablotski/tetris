@@ -57,11 +57,11 @@ class App(object):
         board = Board()
 
         # View
-        cell_renderer = CellRenderer(self.canvas)
+        figure_renderer = CellRenderer(self.canvas)
         board_renderer = BoardRenderer(self.canvas)
 
         # Controller
-        self.__ctr = Controller(board, cell_renderer, board_renderer)
+        self.__ctr = Controller(board, figure_renderer, board_renderer)
         self.root.bind("<Right>", lambda event: self.__ctr.move_right())
         self.root.bind("<Left>", lambda event: self.__ctr.move_left())
         self.root.bind("<Up>", lambda event: self.__ctr.rotate_clockwise())

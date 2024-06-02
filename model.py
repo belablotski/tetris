@@ -1,6 +1,5 @@
 import logging
 import random
-import sys
 
 class ModelException(Exception):
     def __init__(self, *args: object) -> None:
@@ -14,41 +13,22 @@ class FigureProjection(object):
     def __init__(self, layout: list[list[bool]]) -> None:
         super().__init__() 
         self.__layout = layout
+        self.__cell_coords = self.__calc_cells_coords()
 
-    def get_layout(self) -> list[list[bool]]:
-        return self.__layout
-    
-    # TODO: Cache all these methods
-
-    def get_cells_coords(self) -> list[tuple[int, int]]:
+    def __calc_cells_coords(self) -> list[tuple[int, int]]:
         res = []
         for i in range(len(self.__layout)):
             for j in range(len(self.__layout[i])):
                 if self.__layout[i][j]:
                     res.append((i, j))
         return res
-    
-    #@DeprecationWarning
-    def get_footprint_cells_coords(self) -> list[tuple[int, int]]:
-        res = [(sys.maxsize, sys.maxsize)] * len(self.__layout[0])
-        for c in range(len(self.__layout[0])):
-            for r in range(len(self.__layout)-1, -1, -1):
-                if self.__layout[r][c]:
-                    res.append((r, c))
-                    break
-        return [(r, c) for (r, c) in res if r < sys.maxsize]
-    
-    #@DeprecationWarning()
-    def get_leftsideprint_cells_coords(self) -> list[tuple[int, int]]:
-        res = []
-        for r in range(len(self.__layout)):
-            try:
-                c = self.__layout[r].index(True)
-                res.append((r, c))
-            except ValueError:
-                pass
-        return res
 
+    def get_layout(self) -> list[list[bool]]:
+        return self.__layout
+    
+    def get_cells_coords(self) -> list[tuple[int, int]]:
+        return self.__cell_coords
+    
 class Figure(object):
     def __init__(self, projections: list[FigureProjection], current_projection: int) -> None:
         super().__init__()
@@ -115,7 +95,28 @@ class FiguresManager(object):
                 [False, True],
                 [False, True],
                 [False, True]])
-        ], 0)
+        ], 0),
+        Figure([
+            FigureProjection([
+                [True, True],
+                [True, True]])
+        ], 0),
+        Figure([
+            FigureProjection([
+                [False, True, False],
+                [True, True, True]]),
+            FigureProjection([
+                [True, False],
+                [True, True],
+                [True, False]]),
+            FigureProjection([
+                [True, True, True],
+                [False, True, False]]),
+            FigureProjection([
+                [False, True],
+                [True, True],
+                [False, True]])
+        ], 0),
     ]
 
     @classmethod
@@ -153,13 +154,6 @@ class Cell(object):
         else:
             raise ValueError(f'Cell object can be compared only to the same type object.')
 
-class RenderingBase(object):
-    def __init__(self) -> None:
-        super().__init__()
-
-    def to_cells(self) -> list[Cell]:
-        raise NotImplemented()
-
 class Board(object):
     COLS = 12
     ROWS = 25
@@ -174,15 +168,6 @@ class Board(object):
     def is_cell_occupied(self, row, col) -> bool:
         # TODO: Optimize - some sort of topology-based index is needed
         return next((c for c in self.__cells if c.get_row() == row and c.get_col() == col), None) is not None
-
-    #@DeprecationWarning
-    def check_footprint_fit(self, figure: Figure, row: int, col: int) -> bool:
-        rel_coords = figure.get_current_projection().get_footprint_cells_coords()
-        abs_coords = [(r + row, c + col) for (r, c) in rel_coords]
-        if next((r for (r, c) in abs_coords if r >= self.ROWS), None):
-            return False
-        cells_empty = [not self.is_cell_occupied(r, c) for (r, c) in abs_coords]
-        return all(cells_empty)
     
     def check_fit(self, figure: Figure, row: int, col: int) -> bool:
         rel_coords = figure.get_current_projection().get_cells_coords()
@@ -196,7 +181,7 @@ class Board(object):
         self.__cells.extend(cells)
         logging.debug(f'New board state {self.__cells}')
 
-class FigureRendering(RenderingBase):
+class FigureRendering(object):
     def __init__(self, board: Board, figure: Figure, style_idx: int) -> None:
         super().__init__()
         self.__board = board
@@ -239,47 +224,10 @@ class FigureRendering(RenderingBase):
     def rotate_counterclockwise(self) -> None:
         logging.debug(self.__figure)
         self.__figure.rotate_counterclockwise()
+        if not self.__board.check_fit(self.__figure, self.__row, self.__col):
+            self.__figure.rotate_clockwise()
+            raise InvalidMoveException(f'Figure does not fit if roteated counterclockwise.')
 
     def to_cells(self) -> list[Cell]:
         cell_coords = self.__figure.get_current_projection().get_cells_coords()
         return [Cell(self.__row + r, self.__col + c, self.__style_idx) for (r, c) in cell_coords]
-
-
-if __name__ == '__main__':
-    # TODO: move tests into a proper place
-    footprints = [
-        ([(0, 0), (0, 1), (1, 0)], [(1, 0), (0, 1)]),
-        ([(0, 0), (0, 1), (1, 1)], [(0, 0), (1, 1)]),
-        ([(0, 0), (1, 0), (1, 1)], [(1, 0), (1, 1)]),
-        ([(0, 1), (1, 0), (1, 1)], [(1, 0), (1, 1)]),
-        ([(0, 0), (0, 1), (1, 1), (1, 2)], [(0, 0), (1, 1), (1, 2)]),
-        ([(0, 1), (1, 0), (1, 1), (2, 0)], [(2, 0), (1, 1)]),
-        ([(0, 1), (0, 2), (1, 0), (1, 1)], [(1, 0), (1, 1), (0, 2)]),
-        ([(0, 0), (1, 0), (1, 1), (2, 1)], [(1, 0), (2, 1)]),
-        ([(0, 0), (0, 1), (0, 2), (0, 3)], [(0, 0), (0, 1), (0, 2), (0, 3)]),
-        ([(0, 1), (1, 1), (2, 1), (3, 1)], [(3, 1)]),
-    ]
-
-    leftsideprints = [
-        ([(0, 0), (0, 1), (1, 0)], [(0, 0), (1, 0)]),
-        ([(0, 0), (0, 1), (1, 1)], [(0, 0), (1, 1)]),
-        ([(0, 1), (1, 0), (1, 1)], [(0, 1), (1, 0)]),
-        ([(0, 0), (1, 0), (1, 1)], [(0, 0), (1, 0)]),
-        ([(0, 0), (0, 1), (1, 1), (1, 2)], [(0, 0), (1, 1)]),
-        ([(0, 1), (1, 0), (1, 1), (2, 0)], [(0, 1), (1, 0), (2, 0)]),
-        ([(0, 1), (0, 2), (1, 0), (1, 1)], [(0, 1), (1, 0)]),
-        ([(0, 0), (1, 0), (1, 1), (2, 1)], [(0, 0), (1, 0), (2, 1)]),
-        ([(0, 0), (0, 1), (0, 2), (0, 3)], [(0, 0)]),
-        ([(0, 1), (1, 1), (2, 1), (3, 1)], [(0, 1), (1, 1), (2, 1), (3, 1)]),
-    ]
-
-    for figure in FiguresManager.FIGURES:
-        for pi in range(figure.get_projection_count()):
-            projection = figure.get_current_projection().get_cells_coords()
-            footprint = figure.get_current_projection().get_footprint_cells_coords()
-            if footprints.count((projection, footprint)) != 1:
-                print(f'Test failed for projection = {projection} and footprint = {footprint}')
-            leftsideprint = figure.get_current_projection().get_leftsideprint_cells_coords()
-            if leftsideprints.count((projection, leftsideprint)) != 1:
-                print(f'Test failed for projection = {projection} and leftsideprint = {leftsideprint}')
-            figure.rotate_clockwise()
