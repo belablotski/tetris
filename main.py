@@ -41,14 +41,14 @@ class App(object):
         
         self.pausebutton = tk.Button(self.controlframe, text='Pause', command=self.__pause)
         self.pausebutton.grid(column=0, row = 1, pady=10)
-        self.restartbutton = tk.Button(self.controlframe, text='Restart', )
+        self.restartbutton = tk.Button(self.controlframe, text='Restart', command=self.__init_mvc)
         self.restartbutton.grid(column=0, row = 2)
         
         self.mainframe.pack()
         logging.info('Init UI components - done.')
 
     def __push_down_timer(self) -> None:
-        self.__make_it_pausable(self.__ctr.push_down)
+        self.__pausable(self.__ctr.push_down)
         self.root.after(self.__ctr.get_push_down_interval_ms(), self.__push_down_timer)
 
     def __pause(self) -> None:
@@ -56,7 +56,7 @@ class App(object):
         logging.info(f'Pause the game {self.__game_paused}')
         self.pausebutton.config(relief="sunken" if self.__game_paused else "raised")
 
-    def __make_it_pausable(self, func):
+    def __pausable(self, func):
         if self.__game_paused:
             logging.debug('Game paused!')
         else:
@@ -78,11 +78,11 @@ class App(object):
 
         # Controller
         self.__ctr = Controller(game, board, figure_renderer, board_renderer)
-        self.root.bind("<Right>", lambda event: self.__make_it_pausable(self.__ctr.move_right))
-        self.root.bind("<Left>", lambda event: self.__make_it_pausable(self.__ctr.move_left))
-        self.root.bind("<Up>", lambda event: self.__make_it_pausable(self.__ctr.rotate_clockwise))
-        self.root.bind("<Down>", lambda event: self.__make_it_pausable(self.__ctr.rotate_counterclockwise))
-        self.root.bind("<space>", lambda event: self.__make_it_pausable(self.__ctr.drop))
+        self.root.bind("<Right>", lambda event: self.__pausable(self.__ctr.move_right))
+        self.root.bind("<Left>", lambda event: self.__pausable(self.__ctr.move_left))
+        self.root.bind("<Up>", lambda event: self.__pausable(self.__ctr.rotate_clockwise))
+        self.root.bind("<Down>", lambda event: self.__pausable(self.__ctr.rotate_counterclockwise))
+        self.root.bind("<space>", lambda event: self.__pausable(self.__ctr.drop))
         self.__ctr.start_game()
 
         self.root.after(self.__ctr.get_push_down_interval_ms(), self.__push_down_timer)
