@@ -1,12 +1,10 @@
 import logging
-from collections.abc import Callable
 
 from model import Board, Game, FiguresManager, FigureRendering, InvalidMoveException
 from view import CellRenderer, CellStyles, BoardRenderer
 
 class Controller(object):
-    def __init__(self, game: Game, board: Board, figure_renderer: CellRenderer, board_renderer: BoardRenderer, 
-                 score_update_callback: Callable[[int], None]) -> None:
+    def __init__(self, game: Game, board: Board, figure_renderer: CellRenderer, board_renderer: BoardRenderer) -> None:
         super().__init__()
         self.__push_down_interval_ms = 1000
         self.__game = game
@@ -14,7 +12,6 @@ class Controller(object):
         self.__figure_rendering: FigureRendering = None
         self.__figure_renderer = figure_renderer
         self.__board_renderer = board_renderer
-        self.__score_update_callback = score_update_callback
 
     def __refresh_display(self) -> None:
         self.__figure_renderer.display(self.__figure_rendering.to_cells())

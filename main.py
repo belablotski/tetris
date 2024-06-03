@@ -9,6 +9,7 @@ class App(object):
     def __init__(self, root: tk.Tk) -> None:
         super().__init__()
         self.root = root
+        self.__game_paused = False
         self.__init_ui()
         self.__init_mvc()
 
@@ -38,17 +39,28 @@ class App(object):
         self.scorelabel.grid(column=0, row=0)
         self.scorelabel["textvariable"] = self.scorevar
         
-        self.startbutton = tk.Button(self.controlframe, text='Start / Restart')
-        self.startbutton.grid(column=0, row = 1, pady=10)
-        self.stopbutton = tk.Button(self.controlframe, text='Pause')
-        self.stopbutton.grid(column=0, row = 2)
+        self.pausebutton = tk.Button(self.controlframe, text='Pause', command=self.__pause)
+        self.pausebutton.grid(column=0, row = 1, pady=10)
+        self.restartbutton = tk.Button(self.controlframe, text='Restart', )
+        self.restartbutton.grid(column=0, row = 2)
         
         self.mainframe.pack()
         logging.info('Init UI components - done.')
 
-    def __push_down_timer(self):
-        self.__ctr.push_down()
+    def __push_down_timer(self) -> None:
+        self.__make_it_pausable(self.__ctr.push_down)
         self.root.after(self.__ctr.get_push_down_interval_ms(), self.__push_down_timer)
+
+    def __pause(self) -> None:
+        self.__game_paused = not self.__game_paused
+        logging.info(f'Pause the game {self.__game_paused}')
+        self.pausebutton.config(relief="sunken" if self.__game_paused else "raised")
+
+    def __make_it_pausable(self, func):
+        if self.__game_paused:
+            logging.debug('Game paused!')
+        else:
+            return func()
 
     def __update_score(self, score: int) -> None:
         self.scorevar.set(score)
@@ -65,18 +77,18 @@ class App(object):
         board_renderer = BoardRenderer(self.canvas)
 
         # Controller
-        self.__ctr = Controller(game, board, figure_renderer, board_renderer, self.__update_score)
-        self.root.bind("<Right>", lambda event: self.__ctr.move_right())
-        self.root.bind("<Left>", lambda event: self.__ctr.move_left())
-        self.root.bind("<Up>", lambda event: self.__ctr.rotate_clockwise())
-        self.root.bind("<Down>", lambda event: self.__ctr.rotate_counterclockwise())
-        self.root.bind("<space>", lambda event: self.__ctr.drop())
+        self.__ctr = Controller(game, board, figure_renderer, board_renderer)
+        self.root.bind("<Right>", lambda event: self.__make_it_pausable(self.__ctr.move_right))
+        self.root.bind("<Left>", lambda event: self.__make_it_pausable(self.__ctr.move_left))
+        self.root.bind("<Up>", lambda event: self.__make_it_pausable(self.__ctr.rotate_clockwise))
+        self.root.bind("<Down>", lambda event: self.__make_it_pausable(self.__ctr.rotate_counterclockwise))
+        self.root.bind("<space>", lambda event: self.__make_it_pausable(self.__ctr.drop))
         self.__ctr.start_game()
 
         self.root.after(self.__ctr.get_push_down_interval_ms(), self.__push_down_timer)
         logging.info('Init MVC components - done.')
 
-    def run(self):
+    def run(self) -> None:
         logging.info('Entering mainloop...')
         self.root.mainloop()
         logging.info('Exiting mainloop.')
