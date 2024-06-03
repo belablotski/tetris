@@ -1,7 +1,7 @@
 import sys, logging
 import tkinter as tk
 
-from model import Board
+from model import Board, Game
 from view import CellRenderer, BoardRenderer
 from controller import Controller
 
@@ -25,15 +25,15 @@ class App(object):
         self.gameframe = tk.Frame(self.mainframe, background='yellow', width=self.__gameframe_width,
                                     height=self.__win_height)
         self.gameframe.grid(column=0, row=0)
-        self.controlframe = tk.Frame(self.mainframe, background='green', width=self.__win_width-self.__gameframe_width,
-                                    height=self.__win_height)
+        self.controlframe = tk.Frame(self.mainframe, width=self.__win_width-self.__gameframe_width,
+                                    height=self.__win_height, padx=20)
         self.controlframe.grid(column=1, row=0)
         self.canvas = tk.Canvas(self.gameframe, width=self.__gameframe_width, height=self.__gameframe_height,
                                     background='lightblue')
         self.canvas.pack()
 
         self.scorevar = tk.IntVar()
-        self.scorevar.set(1000000)
+        self.scorevar.set(0)
         self.scorelabel = tk.Label(self.controlframe, pady=10)
         self.scorelabel.grid(column=0, row=0)
         self.scorelabel["textvariable"] = self.scorevar
@@ -50,10 +50,14 @@ class App(object):
         self.__ctr.push_down()
         self.root.after(self.__ctr.get_push_down_interval_ms(), self.__push_down_timer)
 
+    def __update_score(self, score: int) -> None:
+        self.scorevar.set(score)
+
     def __init_mvc(self) -> None:
         logging.info('Init MVC components...')
         
         # Model
+        game = Game(self.__update_score)
         board = Board()
 
         # View
@@ -61,7 +65,7 @@ class App(object):
         board_renderer = BoardRenderer(self.canvas)
 
         # Controller
-        self.__ctr = Controller(board, figure_renderer, board_renderer)
+        self.__ctr = Controller(game, board, figure_renderer, board_renderer, self.__update_score)
         self.root.bind("<Right>", lambda event: self.__ctr.move_right())
         self.root.bind("<Left>", lambda event: self.__ctr.move_left())
         self.root.bind("<Up>", lambda event: self.__ctr.rotate_clockwise())

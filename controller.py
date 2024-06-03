@@ -1,16 +1,20 @@
 import logging
+from collections.abc import Callable
 
-from model import Board, FiguresManager, FigureRendering, InvalidMoveException
+from model import Board, Game, FiguresManager, FigureRendering, InvalidMoveException
 from view import CellRenderer, CellStyles, BoardRenderer
 
 class Controller(object):
-    def __init__(self, board: Board, figure_renderer: CellRenderer, board_renderer: BoardRenderer) -> None:
+    def __init__(self, game: Game, board: Board, figure_renderer: CellRenderer, board_renderer: BoardRenderer, 
+                 score_update_callback: Callable[[int], None]) -> None:
         super().__init__()
         self.__push_down_interval_ms = 1000
+        self.__game = game
         self.__board = board
         self.__figure_rendering: FigureRendering = None
         self.__figure_renderer = figure_renderer
         self.__board_renderer = board_renderer
+        self.__score_update_callback = score_update_callback
 
     def __refresh_display(self) -> None:
         self.__figure_renderer.display(self.__figure_rendering.to_cells())
@@ -21,7 +25,11 @@ class Controller(object):
             self.__board.figure_final_placement(self.__figure_rendering.to_cells())
             completed_rows = self.__board.get_completed_rows()
             # TODO: It will be great to remove them one by one with some sort of animation.
-            self.__board.remove_rows(completed_rows)
+            if completed_rows:
+                self.__game.score_completed_rows(len(completed_rows))
+                self.__board.remove_rows(completed_rows)
+                self.__board_renderer.reset()
+                self.__board_renderer.clear_canvas()
             self.__board_renderer.display(self.__board.get_cells())
             self.__figure_renderer.reset()
         figure = FiguresManager.get_random()
@@ -37,6 +45,10 @@ class Controller(object):
             logging.debug(f'Blocking move: {e}')
             if start_over_if_fails:
                 self.__next_figure()
+
+    def __go_down(self):
+        self.__game.score_move_down()
+        self.__move(self.__figure_rendering.move_down, True)
 
     def get_push_down_interval_ms(self) -> int:
         return self.__push_down_interval_ms
@@ -59,11 +71,11 @@ class Controller(object):
 
     def drop(self) -> None:
         logging.debug('Drop')
-        self.__move(self.__figure_rendering.move_down, True)
+        self.__go_down()
 
     def push_down(self) -> None:
         logging.debug('Push-down')
-        self.__move(self.__figure_rendering.move_down, True)
+        self.__go_down()
 
     def start_game(self) -> None:
         self.__next_figure()

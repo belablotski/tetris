@@ -62,6 +62,9 @@ class CellRenderer(object):
         bg = self.__canvas['background']
         self.__canvas.create_polygon(self.__calc_cell_polygon(cell), outline=bg, fill=bg, width=3)
 
+    def _get_canvas(self):
+        return self.__canvas
+
     def reset(self) -> None:
         self.__prev_cells = []
     
@@ -85,3 +88,6 @@ class BoardRenderer(CellRenderer):
 
     def __init__(self, canvas: tk.Canvas) -> None:
         super().__init__(canvas)
+
+    def clear_canvas(self) -> None:
+        self._get_canvas().delete("all")
