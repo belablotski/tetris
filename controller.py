@@ -1,10 +1,12 @@
 import logging
+from collections.abc import Callable
 
-from model import Board, Game, FiguresManager, FigureRendering, InvalidMoveException
+from model import Board, Game, FiguresManager, FigureRendering, InvalidMoveException, GameOverException
 from view import CellRenderer, CellStyles, BoardRenderer
 
 class Controller(object):
-    def __init__(self, game: Game, board: Board, figure_renderer: CellRenderer, board_renderer: BoardRenderer) -> None:
+    def __init__(self, game: Game, board: Board, figure_renderer: CellRenderer, board_renderer: BoardRenderer,
+                 game_over_callback: Callable[[], None] = None) -> None:
         super().__init__()
         self.__push_down_interval_ms = 1000
         self.__game = game
@@ -12,6 +14,7 @@ class Controller(object):
         self.__figure_rendering: FigureRendering = None
         self.__figure_renderer = figure_renderer
         self.__board_renderer = board_renderer
+        self.__game_over_callback = game_over_callback
 
     def __refresh_display(self) -> None:
         self.__figure_renderer.display(self.__figure_rendering.to_cells())
@@ -31,8 +34,11 @@ class Controller(object):
             self.__figure_renderer.reset()
         figure = FiguresManager.get_random()
         logging.info(f'New figure {figure}: {figure.get_current_projection()}')
-        self.__figure_rendering = FigureRendering(self.__board, figure, CellStyles.get_random_style_idx())
-        self.__refresh_display()
+        try:
+            self.__figure_rendering = FigureRendering(self.__board, figure, CellStyles.get_random_style_idx())
+            self.__refresh_display()
+        except GameOverException:
+            self.__game_over_callback()
 
     def __move(self, mv_func, start_over_if_fails):
         try:
@@ -76,3 +82,12 @@ class Controller(object):
 
     def start_game(self) -> None:
         self.__next_figure()
+
+    def reset(self) -> None:
+        self.__game.reset()
+        self.__board.reset()
+        self.__board_renderer.reset()
+        self.__board_renderer.clear_canvas()
+        self.__figure_renderer.reset()
+        self.__figure_rendering = None
+        self.start_game()

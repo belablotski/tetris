@@ -212,6 +212,9 @@ class Board(object):
         for cell in self.__cells:
             cell.set_row(cell.get_row() + len([r for r in rows if cell.get_row() < r]))
 
+    def reset(self):
+        self.__cells = []
+
 class FigureRendering(object):
     def __init__(self, board: Board, figure: Figure, style_idx: int) -> None:
         super().__init__()
@@ -265,6 +268,7 @@ class FigureRendering(object):
         cell_coords = self.__figure.get_current_projection().get_cells_coords()
         return [Cell(self.__row + r, self.__col + c, self.__style_idx) for (r, c) in cell_coords]
 
+# TODO: add level, num of lines
 class Game(object):
     def __init__(self, score_update_callback: Callable[[int], None] = None) -> None:
         super().__init__()
@@ -284,6 +288,9 @@ class Game(object):
 
     def score_move_down(self) -> None:
         self.__set_score(self.__score + 1)
+
+    def reset(self) -> None:
+      self.__set_score(0)  
 
 if __name__ == '__main__':
     import copy

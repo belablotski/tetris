@@ -10,6 +10,7 @@ class App(object):
         super().__init__()
         self.root = root
         self.__game_paused = False
+        self.__game_over = False
         self.__init_ui()
         self.__init_mvc()
 
@@ -41,7 +42,7 @@ class App(object):
         
         self.pausebutton = tk.Button(self.controlframe, text='Pause', command=self.__pause)
         self.pausebutton.grid(column=0, row = 1, pady=10)
-        self.restartbutton = tk.Button(self.controlframe, text='Restart', command=self.__init_mvc)
+        self.restartbutton = tk.Button(self.controlframe, text='Restart', command=self.__restart)
         self.restartbutton.grid(column=0, row = 2)
         
         self.mainframe.pack()
@@ -56,14 +57,21 @@ class App(object):
         logging.info(f'Pause the game {self.__game_paused}')
         self.pausebutton.config(relief="sunken" if self.__game_paused else "raised")
 
+    def __restart(self) -> None:
+        self.__game_over = False
+        self.__ctr.reset()
+
     def __pausable(self, func):
-        if self.__game_paused:
-            logging.debug('Game paused!')
+        if self.__game_paused or self.__game_over:
+            logging.debug(f'Game {"paused" if self.__game_paused else "over"}')
         else:
             return func()
 
     def __update_score(self, score: int) -> None:
         self.scorevar.set(score)
+
+    def __set_game_over(self) -> None:
+        self.__game_over = True
 
     def __init_mvc(self) -> None:
         logging.info('Init MVC components...')
@@ -77,7 +85,7 @@ class App(object):
         board_renderer = BoardRenderer(self.canvas)
 
         # Controller
-        self.__ctr = Controller(game, board, figure_renderer, board_renderer)
+        self.__ctr = Controller(game, board, figure_renderer, board_renderer, self.__set_game_over)
         self.root.bind("<Right>", lambda event: self.__pausable(self.__ctr.move_right))
         self.root.bind("<Left>", lambda event: self.__pausable(self.__ctr.move_left))
         self.root.bind("<Up>", lambda event: self.__pausable(self.__ctr.rotate_clockwise))
