@@ -39,11 +39,17 @@ class App(object):
         self.scorelabel = tk.Label(self.controlframe, pady=10)
         self.scorelabel.grid(column=0, row=0)
         self.scorelabel["textvariable"] = self.scorevar
+
+        self.linesvar = tk.IntVar()
+        self.linesvar.set(0)
+        self.lineslabel = tk.Label(self.controlframe, pady=10)
+        self.lineslabel.grid(column=0, row=1)
+        self.lineslabel["textvariable"] = self.linesvar
         
         self.pausebutton = tk.Button(self.controlframe, text='Pause', command=self.__pause)
-        self.pausebutton.grid(column=0, row = 1, pady=10)
+        self.pausebutton.grid(column=0, row = 2, pady=10)
         self.restartbutton = tk.Button(self.controlframe, text='Restart', command=self.__restart)
-        self.restartbutton.grid(column=0, row = 2)
+        self.restartbutton.grid(column=0, row = 3)
         
         self.mainframe.pack()
         logging.info('Init UI components - done.')
@@ -77,7 +83,7 @@ class App(object):
         logging.info('Init MVC components...')
         
         # Model
-        game = Game(self.__update_score)
+        game = Game(lambda score: self.scorevar.set(score), lambda lines: self.linesvar.set(lines))
         board = Board()
 
         # View

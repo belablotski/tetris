@@ -268,29 +268,42 @@ class FigureRendering(object):
         cell_coords = self.__figure.get_current_projection().get_cells_coords()
         return [Cell(self.__row + r, self.__col + c, self.__style_idx) for (r, c) in cell_coords]
 
-# TODO: add level, num of lines
+# TODO: add game level
 class Game(object):
-    def __init__(self, score_update_callback: Callable[[int], None] = None) -> None:
+    def __init__(self, score_update_callback: Callable[[int], None] = None, 
+                 lines_update_callback: Callable[[int], None] = None) -> None:
         super().__init__()
         self.__score = 0
+        self.__lines = 0
         self.__score_update_callback = score_update_callback
+        self.__lines_update_callback = lines_update_callback
 
-    def get_score(self) -> None:
-        return self.__score
-    
     def __set_score(self, score: int) -> None:
         self.__score = score
         if self.__score_update_callback:
             self.__score_update_callback(score)
 
+    def __set_lines(self, lines: int) -> None:
+        self.__lines = lines
+        if self.__lines_update_callback:
+            self.__lines_update_callback(lines)
+
+    def get_score(self) -> int:
+        return self.__score
+    
+    def get_lines(self) -> int:
+        return self.__lines
+
     def score_completed_rows(self, number_of_rows: int) -> None:
         self.__set_score(self.__score + number_of_rows * 100)
+        self.__set_lines(self.__lines + number_of_rows)
 
     def score_move_down(self) -> None:
         self.__set_score(self.__score + 1)
 
     def reset(self) -> None:
-      self.__set_score(0)  
+      self.__set_score(0)
+      self.__set_lines(0)
 
 if __name__ == '__main__':
     import copy
