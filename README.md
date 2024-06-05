@@ -39,4 +39,4 @@ print(tcl.call(“info”, “patchlevel”))
 1. Check you Python version - type `python` in terminal. Excected to be "3.11" or something above 3.9.
 2. Run `sudo apt-get install python3.11-tk` for your Python version ("3.11" here).
 
-Most likely it will be enough. If no, use the MacOS procedure for troubleshooting (check Tcl version, upgrade if necessary).
+Most likely it will be enough. If no, use the MacOS procedure for troubleshooting (check Tcl version, upgrade if necessary, check `tkinter` using the Python code fragment above, re-install if necessary).
