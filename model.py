@@ -268,7 +268,7 @@ class FigureRendering(object):
         cell_coords = self.__figure.get_current_projection().get_cells_coords()
         return [Cell(self.__row + r, self.__col + c, self.__style_idx) for (r, c) in cell_coords]
 
-# TODO: add game level
+# TODO: add game level, auto-increment it after every 10 (or ?) lines.
 class Game(object):
     def __init__(self, score_update_callback: Callable[[int], None] = None, 
                  lines_update_callback: Callable[[int], None] = None) -> None:
