@@ -14,7 +14,7 @@ class GameOverException(ModelException):
     def __init__(self, *args: object) -> None:
         super().__init__(*args)
 
-class FigureProjection(object):
+class FigureRotation(object):
     def __init__(self, layout: list[list[bool]]) -> None:
         super().__init__() 
         self.__layout = layout
@@ -35,7 +35,7 @@ class FigureProjection(object):
         return self.__cell_coords
     
 class Figure(object):
-    def __init__(self, projections: list[FigureProjection], current_projection: int) -> None:
+    def __init__(self, projections: list[FigureRotation], current_projection: int) -> None:
         super().__init__()
         assert 0 <= len(projections) <= 4 
         assert 0 <= current_projection < len(projections)
@@ -45,7 +45,7 @@ class Figure(object):
     def get_projection_count(self) -> None:
         return len(self.__projections)
     
-    def get_current_projection(self) -> FigureProjection:
+    def get_current_projection(self) -> FigureRotation:
         return self.__projections[self.__current_projection]
     
     def rotate_counterclockwise(self) -> None:
@@ -61,66 +61,99 @@ class Figure(object):
 class FiguresManager(object):
     FIGURES = [
         Figure([
-            FigureProjection([
+            FigureRotation([
                 [True, True],
                 [True, False]]),
-                FigureProjection([
+                FigureRotation([
                 [True, True],
                 [False, True]]),
-                FigureProjection([
+                FigureRotation([
                 [False, True],
                 [True, True]]),
-                FigureProjection([
+                FigureRotation([
                 [True, False],
                 [True, True]])
         ], 0),
         Figure([
-            FigureProjection([
+            FigureRotation([
                 [True, True, False],
                 [False, True, True]]),
-            FigureProjection([
+            FigureRotation([
                 [False, True],
                 [True, True],
                 [True, False]])
         ], 0),
         Figure([
-            FigureProjection([
+            FigureRotation([
                 [False, True, True],
                 [True, True, False]]),
-            FigureProjection([
+            FigureRotation([
                 [True, False],
                 [True, True],
                 [False, True]])
         ], 0),
         Figure([
-            FigureProjection([
+            FigureRotation([
                 [True, True, True, True]]),
-            FigureProjection([
+            FigureRotation([
                 [False, True],
                 [False, True],
                 [False, True],
                 [False, True]])
         ], 0),
         Figure([
-            FigureProjection([
+            FigureRotation([
                 [True, True],
                 [True, True]])
         ], 0),
         Figure([
-            FigureProjection([
+            FigureRotation([
                 [False, True, False],
                 [True, True, True]]),
-            FigureProjection([
+            FigureRotation([
                 [True, False],
                 [True, True],
                 [True, False]]),
-            FigureProjection([
+            FigureRotation([
                 [True, True, True],
                 [False, True, False]]),
-            FigureProjection([
+            FigureRotation([
                 [False, False, True],
                 [False, True, True],
                 [False, False, True]])
+        ], 0),
+        Figure([
+            FigureRotation([
+                [True, True, True],
+                [True, False, False]]),
+            FigureRotation([
+                [False, True, True],
+                [False, False, True],
+                [False, False, True]]),
+            FigureRotation([
+                [False, False, True],
+                [True, True, True]]),
+            FigureRotation([
+                [True, False, False],
+                [True, False, False],
+                [True, True, False]])
+        ], 0),
+        Figure([
+            FigureRotation([
+                [True, True, True],
+                [False, False, True],
+                ]),
+            FigureRotation([
+                [False, False, True],
+                [False, False, True],
+                [False, True, True]]),
+            FigureRotation([
+                [True, False, False],
+                [True, True, True]]),
+            FigureRotation([
+                [True, True, False],
+                [True, False, False],
+                [True, False, False]])
         ], 0),
     ]
 
