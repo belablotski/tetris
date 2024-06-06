@@ -190,16 +190,12 @@ class Cell(object):
     def __eq__(self, value: object) -> bool:
         if isinstance(value, Cell):
             c: Cell = value
-            #logging.trace(f'Comparing {self} to {c}')
             return self.__col == c.get_col() and self.__row == c.get_row() and self.__style_idx == c.get_style_idx()
         else:
             raise ValueError(f'Cell object can be compared only to the same type object.')
 
 class Board(object):
-    COLS = 12
-    ROWS = 25
-
-    def __init__(self, rows = 25, cols = 12, cells = []) -> None:
+    def __init__(self, rows: int, cols: int, cells = []) -> None:
         super().__init__()
         self.__rows = rows
         self.__cols = cols

@@ -11,14 +11,17 @@ class App(object):
         self.root = root
         self.__game_paused = False
         self.__game_over = False
+        self.__board_rows = 25
+        self.__board_cols = 12
+        self.__cell_size_px = 30
         self.__init_ui()
         self.__init_mvc()
 
     def __init_ui(self) -> None:
-        self.__win_width = BoardRenderer.CANVAS_WIDTH + 200
-        self.__win_height = BoardRenderer.CANVAS_HEIGHT
-        self.__gameframe_width = BoardRenderer.CANVAS_WIDTH
-        self.__gameframe_height = self.__win_height
+        self.__gameframe_width = self.__board_cols * self.__cell_size_px
+        self.__gameframe_height = self.__board_rows * self.__cell_size_px
+        self.__win_width = self.__gameframe_width + 200
+        self.__win_height = self.__gameframe_height
 
         logging.info('Init UI components...')
         self.root.title('Tetris 0.1')
@@ -84,11 +87,11 @@ class App(object):
         
         # Model
         game = Game(lambda score: self.scorevar.set(score), lambda lines: self.linesvar.set(lines))
-        board = Board()
+        board = Board(self.__board_rows, self.__board_cols)
 
         # View
-        figure_renderer = CellRenderer(self.canvas)
-        board_renderer = BoardRenderer(self.canvas)
+        figure_renderer = CellRenderer(self.canvas, self.__cell_size_px)
+        board_renderer = BoardRenderer(self.canvas, self.__cell_size_px)
 
         # Controller
         self.__ctr = Controller(game, board, figure_renderer, board_renderer, self.__set_game_over)

@@ -19,11 +19,10 @@ class CellStyles(object):
         return cls.STYLES[style_idx]
 
 class CellRenderer(object):
-    CELL_SIZE_PX = 30
-
-    def __init__(self, canvas: tk.Canvas) -> None:
+    def __init__(self, canvas: tk.Canvas, cell_size_px: int) -> None:
         super().__init__()
         self.__canvas = canvas
+        self.__cell_size_px = cell_size_px
         self.__prev_cells: list[Cell] = []
 
     def __get_changed_cells(self, cells: list[Cell]) -> tuple[list[Cell], list[Cell]]:
@@ -48,7 +47,7 @@ class CellRenderer(object):
         return (cells_to_put, cells_to_remove)
 
     def __calc_cell_polygon(self, cell: Cell) -> list[int]:
-        sz = self.CELL_SIZE_PX
+        sz = self.__cell_size_px
         margin = 3
         x = cell.get_col() * sz
         y = cell.get_row() * sz
@@ -83,11 +82,8 @@ class CellRenderer(object):
             self.__render_cell(cell)
 
 class BoardRenderer(CellRenderer):
-    CANVAS_WIDTH = Board.COLS * CellRenderer.CELL_SIZE_PX
-    CANVAS_HEIGHT = Board.ROWS * CellRenderer.CELL_SIZE_PX
-
-    def __init__(self, canvas: tk.Canvas) -> None:
-        super().__init__(canvas)
+    def __init__(self, canvas: tk.Canvas, cell_size_px: int) -> None:
+        super().__init__(canvas, cell_size_px)
 
     def clear_canvas(self) -> None:
         self._get_canvas().delete("all")
