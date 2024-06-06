@@ -299,11 +299,13 @@ class FigureRendering(object):
 
 # TODO: add game level, auto-increment it after every 10 (or ?) lines.
 class Game(object):
-    def __init__(self, score_update_callback: Callable[[int], None] = None, 
+    def __init__(self, rows: int, cols: int,
+                 score_update_callback: Callable[[int], None] = None, 
                  lines_update_callback: Callable[[int], None] = None) -> None:
         super().__init__()
         self.__score = 0
         self.__lines = 0
+        self.__board = Board(rows, cols)
         self.__score_update_callback = score_update_callback
         self.__lines_update_callback = lines_update_callback
 
@@ -316,6 +318,9 @@ class Game(object):
         self.__lines = lines
         if self.__lines_update_callback:
             self.__lines_update_callback(lines)
+
+    def get_board(self) -> Board:
+        return self.__board
 
     def get_score(self) -> int:
         return self.__score
@@ -333,6 +338,7 @@ class Game(object):
     def reset(self) -> None:
       self.__set_score(0)
       self.__set_lines(0)
+      self.__board.reset()
 
 if __name__ == '__main__':
     import copy

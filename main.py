@@ -86,15 +86,16 @@ class App(object):
         logging.info('Init MVC components...')
         
         # Model
-        game = Game(lambda score: self.scorevar.set(score), lambda lines: self.linesvar.set(lines))
-        board = Board(self.__board_rows, self.__board_cols)
+        game = Game(rows=25, cols=12,
+                    score_update_callback=lambda score: self.scorevar.set(score), 
+                    lines_update_callback=lambda lines: self.linesvar.set(lines))
 
         # View
         figure_renderer = CellRenderer(self.canvas, self.__cell_size_px)
         board_renderer = BoardRenderer(self.canvas, self.__cell_size_px)
 
         # Controller
-        self.__ctr = Controller(game, board, figure_renderer, board_renderer, self.__set_game_over)
+        self.__ctr = Controller(game, figure_renderer, board_renderer, self.__set_game_over)
         self.root.bind("<Right>", lambda event: self.__pausable(self.__ctr.move_right))
         self.root.bind("<Left>", lambda event: self.__pausable(self.__ctr.move_left))
         self.root.bind("<Up>", lambda event: self.__pausable(self.__ctr.rotate_clockwise))
