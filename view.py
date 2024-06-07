@@ -1,6 +1,6 @@
 import logging, random
-import tkinter as tk
-from model import Cell, Board
+from tkinter import Canvas
+from model import Cell
 
 class CellStyles(object):
     STYLES = [
@@ -19,7 +19,7 @@ class CellStyles(object):
         return cls.STYLES[style_idx]
 
 class CellRenderer(object):
-    def __init__(self, canvas: tk.Canvas, cell_size_px: int) -> None:
+    def __init__(self, canvas: Canvas, cell_size_px: int) -> None:
         super().__init__()
         self.__canvas = canvas
         self.__cell_size_px = cell_size_px
@@ -82,8 +82,20 @@ class CellRenderer(object):
             self.__render_cell(cell)
 
 class BoardRenderer(CellRenderer):
-    def __init__(self, canvas: tk.Canvas, cell_size_px: int) -> None:
+    def __init__(self, canvas: Canvas, cell_size_px: int) -> None:
         super().__init__(canvas, cell_size_px)
 
     def clear_canvas(self) -> None:
         self._get_canvas().delete("all")
+
+class BoardView(object):
+    def __init__(self, canvas: Canvas, cell_size_px) -> None:
+        super().__init__()
+        self.__figure_renderer = CellRenderer(canvas, cell_size_px)
+        self.__board_renderer = BoardRenderer(canvas, cell_size_px)
+
+    def get_figure_renderer(self) -> CellRenderer:
+        return self.__figure_renderer
+    
+    def get_board_renderer(self) -> BoardRenderer:
+        return self.__board_renderer

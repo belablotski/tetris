@@ -1,19 +1,19 @@
 import sys, logging
 import tkinter as tk
 
-from model import Board, Game
-from view import CellRenderer, BoardRenderer
+from model import Game
+from view import BoardView
 from controller import Controller
 
 class App(object):
     def __init__(self, root: tk.Tk) -> None:
         super().__init__()
-        self.root = root
-        self.__game_paused = False
-        self.__game_over = False
         self.__board_rows = 25
         self.__board_cols = 12
         self.__cell_size_px = 30
+        self.root = root
+        self.__game_paused = False
+        self.__game_over = False
         self.__init_ui()
         self.__init_mvc()
 
@@ -37,22 +37,26 @@ class App(object):
                                     background='lightblue')
         self.canvas.pack()
 
+        self.scorelabelcapt = tk.Label(self.controlframe, text='Score', pady=0)
+        self.scorelabelcapt.grid(column=0, row=0)
         self.scorevar = tk.IntVar()
         self.scorevar.set(0)
         self.scorelabel = tk.Label(self.controlframe, pady=10)
-        self.scorelabel.grid(column=0, row=0)
+        self.scorelabel.grid(column=0, row=1)
         self.scorelabel["textvariable"] = self.scorevar
 
+        self.scorelabelcapt = tk.Label(self.controlframe, text='Lines', pady=0)
+        self.scorelabelcapt.grid(column=0, row=2)
         self.linesvar = tk.IntVar()
         self.linesvar.set(0)
         self.lineslabel = tk.Label(self.controlframe, pady=10)
-        self.lineslabel.grid(column=0, row=1)
+        self.lineslabel.grid(column=0, row=3)
         self.lineslabel["textvariable"] = self.linesvar
         
         self.pausebutton = tk.Button(self.controlframe, text='Pause', command=self.__pause)
-        self.pausebutton.grid(column=0, row = 2, pady=10)
+        self.pausebutton.grid(column=0, row = 4, pady=10)
         self.restartbutton = tk.Button(self.controlframe, text='Restart', command=self.__restart)
-        self.restartbutton.grid(column=0, row = 3)
+        self.restartbutton.grid(column=0, row = 5)
         
         self.mainframe.pack()
         logging.info('Init UI components - done.')
@@ -76,9 +80,6 @@ class App(object):
         else:
             return func()
 
-    def __update_score(self, score: int) -> None:
-        self.scorevar.set(score)
-
     def __set_game_over(self) -> None:
         self.__game_over = True
 
@@ -86,16 +87,15 @@ class App(object):
         logging.info('Init MVC components...')
         
         # Model
-        game = Game(rows=25, cols=12,
+        game = Game(rows=self.__board_rows, cols=self.__board_cols,
                     score_update_callback=lambda score: self.scorevar.set(score), 
                     lines_update_callback=lambda lines: self.linesvar.set(lines))
 
         # View
-        figure_renderer = CellRenderer(self.canvas, self.__cell_size_px)
-        board_renderer = BoardRenderer(self.canvas, self.__cell_size_px)
+        board_view = BoardView(self.canvas, self.__cell_size_px)
 
         # Controller
-        self.__ctr = Controller(game, figure_renderer, board_renderer, self.__set_game_over)
+        self.__ctr = Controller(game, board_view, self.__set_game_over)
         self.root.bind("<Right>", lambda event: self.__pausable(self.__ctr.move_right))
         self.root.bind("<Left>", lambda event: self.__pausable(self.__ctr.move_left))
         self.root.bind("<Up>", lambda event: self.__pausable(self.__ctr.rotate_clockwise))
