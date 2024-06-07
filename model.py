@@ -58,7 +58,7 @@ class Figure(object):
         if self.__current_projection >= len(self.__projections):
             self.__current_projection = 0
 
-class FiguresManager(object):
+class FigureFactory(object):
     FIGURES = [
         Figure([
             FigureRotation([

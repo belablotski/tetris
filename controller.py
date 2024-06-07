@@ -1,7 +1,7 @@
 import logging
 from collections.abc import Callable
 
-from model import Game, FiguresManager, FigureRendering, InvalidMoveException, GameOverException
+from model import Game, FigureFactory, FigureRendering, InvalidMoveException, GameOverException
 from view import CellStyles, BoardView
 
 class Controller(object):
@@ -29,7 +29,7 @@ class Controller(object):
                 self.__board_view.get_board_renderer().clear_canvas()
             self.__board_view.get_board_renderer().display()
             self.__board_view.get_figure_renderer().reset()
-        figure = FiguresManager.get_random()
+        figure = FigureFactory.get_random()
         logging.info(f'New figure {figure.get_current_projection().get_layout()}')
         try:
             self.__figure_rendering = FigureRendering(self.__game.get_board(), figure, CellStyles.get_random_style_idx())
