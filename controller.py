@@ -27,7 +27,7 @@ class Controller(object):
                 self.__game.get_board().remove_rows(completed_rows)
                 self.__board_view.get_board_renderer().reset()
                 self.__board_view.get_board_renderer().clear_canvas()
-            self.__board_view.get_board_renderer().display(self.__game.get_board().get_cells())
+            self.__board_view.get_board_renderer().display()
             self.__board_view.get_figure_renderer().reset()
         figure = FiguresManager.get_random()
         logging.info(f'New figure {figure.get_current_projection().get_layout()}')
@@ -82,8 +82,6 @@ class Controller(object):
 
     def reset(self) -> None:
         self.__game.reset()
-        self.__board_view.get_board_renderer().reset()
-        self.__board_view.get_board_renderer().clear_canvas()
-        self.__board_view.get_figure_renderer().reset()
+        self.__board_view.reset()
         self.__figure_rendering = None
         self.start_game()

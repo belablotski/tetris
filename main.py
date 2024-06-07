@@ -92,7 +92,7 @@ class App(object):
                     lines_update_callback=lambda lines: self.linesvar.set(lines))
 
         # View
-        board_view = BoardView(self.canvas, self.__cell_size_px)
+        board_view = BoardView(game.get_board(), self.canvas, self.__cell_size_px)
 
         # Controller
         self.__ctr = Controller(game, board_view, self.__set_game_over)
