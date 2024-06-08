@@ -105,6 +105,6 @@ class BoardView(object):
         return self.__board_renderer
 
     def reset(self) -> None:
-        self.__board_renderer().reset()
-        self.__board_renderer().clear_canvas()
-        self.__figure_renderer().reset()
+        self.__board_renderer.reset()
+        self.__board_renderer.clear_canvas()
+        self.__figure_renderer.reset()
