@@ -52,7 +52,7 @@ class CellRenderer(object):
         x = cell.get_col() * sz
         y = cell.get_row() * sz
         return [x, y, x+sz-margin, y, x+sz-margin, y+sz-margin, x, y+sz-margin]
-        
+    
     def __render_cell(self, cell: Cell) -> None:
         (fill, outline) = CellStyles.get_style(cell.get_style_idx())
         self.__canvas.create_polygon(self.__calc_cell_polygon(cell), outline=outline, fill=fill, width=3)
