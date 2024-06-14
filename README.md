@@ -40,3 +40,41 @@ print(tcl.call(“info”, “patchlevel”))
 2. Run `sudo apt-get install python3.11-tk` for your Python version ("3.11" here).
 
 Most likely it will be enough. If no, use the MacOS procedure for troubleshooting (check Tcl version, upgrade if necessary, check `tkinter` using the Python code fragment above, re-install if necessary).
+
+# Reverse engineer the code
+
+Install https://www.graphviz.org/ and https://pypi.org/project/pylint/
+
+```
+### Graphviz ###
+
+# For Linux
+sudo apt install graphviz
+
+# For Mac OS
+brew install graphviz
+
+### Pylint ###
+
+# Create a virtual environment if you haven't yet
+python -m venv .venv
+
+# Active it
+source ./.venv/bin/activate
+
+# Install libs
+# pip install graphviz
+pip install pylint
+```
+
+Generate UML diagrams - pyreverse will create `classes.png` and `packages.png` in the `diags` folder.
+
+```
+mkdir diags
+
+pyreverse ./ --output png --output-directory ./diags --module-names y
+```
+
+![Tetris packages](./diags/packages.png)
+
+![Tetris classes](./diags/classes.png)
