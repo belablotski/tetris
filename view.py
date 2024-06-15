@@ -49,9 +49,11 @@ class CellRenderer(object):
     def __calc_cell_polygon(self, cell: Cell) -> list[int]:
         sz = self.__cell_size_px
         margin = 3
-        x = cell.get_col() * sz
-        y = cell.get_row() * sz
+        x = cell.get_col() * sz + 2
+        y = cell.get_row() * sz + 2
         return [x, y, x+sz-margin, y, x+sz-margin, y+sz-margin, x, y+sz-margin]
+        # The randomization added during the demo
+        # return [x, y, x+sz-margin-random.randint(1,2), y-random.randint(1,2), x+sz-margin+random.randint(1,2), y+sz-margin+random.randint(1,2), x, y+sz-margin]
     
     def __render_cell(self, cell: Cell) -> None:
         (fill, outline) = CellStyles.get_style(cell.get_style_idx())
