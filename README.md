@@ -70,7 +70,7 @@ pip install pylint
 Generate UML diagrams - pyreverse will create `classes.png` and `packages.png` in the `diags` folder.
 
 ```
-mkdir diags
+# mkdir diags
 
 pyreverse ./ --output png --output-directory ./diags --module-names y
 ```
