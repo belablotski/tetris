@@ -41,6 +41,19 @@ print(tcl.call(“info”, “patchlevel”))
 
 Most likely it will be enough. If no, use the MacOS procedure for troubleshooting (check Tcl version, upgrade if necessary, check `tkinter` using the Python code fragment above, re-install if necessary).
 
+### Python modules
+
+```
+# Create a virtual environment if you haven't yet
+python -m venv .venv
+
+# Active it
+source ./.venv/bin/activate
+
+# Install Python dependencies
+pip install -r requirements.txt
+```
+
 # Reverse engineer the code
 
 Install https://www.graphviz.org/ and https://pypi.org/project/pylint/
