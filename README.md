@@ -54,6 +54,17 @@ source ./.venv/bin/activate
 pip install -r requirements.txt
 ```
 
+### Start the app
+
+You can use or [start_local.sh](./start_local.sh), either just `python main.py`
+
+```
+bash ./start_local.sh
+
+# or
+# python main.py
+```
+
 # Reverse engineer the code
 
 Install https://www.graphviz.org/ and https://pypi.org/project/pylint/
@@ -112,4 +123,6 @@ Take a look at [Authentication.ipynb](https://github.com/google-gemini/cookbook/
 
 Basically, generate new API key in https://aistudio.google.com/app/apikey
 
-The application reads API key from `GOOGLE_AI_APIKEY` environment variable. You might want to modify [start_local-sample.sh](./start_local-sample.sh), put the API key there and save it as [start_local.sh](./start_local.sh)
+The application reads API key from `GOOGLE_AI_APIKEY` environment variable. You might want to modify [start_local-sample.sh](./start_local-sample.sh), put the API key there and save it as `start_local.sh`
+
+The same with the [.env-sample](./.env-sample) - if you're thinking of using Jupyter notebooks, please put your Google AI API key there and rename it to `.env`

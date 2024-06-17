@@ -1,4 +1,6 @@
+# files with environment variables (API keys)
 start_local.sh
+.env
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
