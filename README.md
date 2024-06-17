@@ -126,3 +126,9 @@ Basically, generate new API key in https://aistudio.google.com/app/apikey
 The application reads API key from `GOOGLE_AI_APIKEY` environment variable. You might want to modify [start_local-sample.sh](./start_local-sample.sh), put the API key there and save it as `start_local.sh`
 
 The same with the [.env-sample](./.env-sample) - if you're thinking of using Jupyter notebooks, please put your Google AI API key there and rename it to `.env`
+
+# Ideas
+
+1. Multi-turn interactions (see [here](https://github.com/google-gemini/cookbook/blob/main/quickstarts/Prompting.ipynb)). Basically Tetris is nothing else but a char, where the "gravity" makes it move, pushing a piece down every second, and the player is its counterpart.
+2. Add "move left", "move right", etc. as tools in https://github.com/google-gemini/cookbook/blob/main/quickstarts/Function_calling.ipynb
+3. Use multimodel capabilities of Gemini - show it an image of the Tetris board and ask about the next move.
