@@ -78,3 +78,25 @@ pyreverse ./ --output png --output-directory ./diags --module-names y
 ![Tetris packages](./diags/packages.png)
 
 ![Tetris classes](./diags/classes.png)
+
+# Tetris AI co-pilot
+
+This game of Tetris is equipped with AI co-pilot powered by Google AI.
+
+* Google AI (for small projects)
+    * Google AI Studio https://aistudio.google.com/
+    * API reference https://ai.google.dev/api
+* Google Vertex AI (for enterprise deployments)
+    * Vertex AI Studio https://console.cloud.google.com/vertex-ai/
+    * [Generative AI on Vertex AI docs](https://cloud.google.com/vertex-ai/generative-ai/docs/start/quickstarts/quickstart-multimodal?hl=en)
+* Gemini AI docs
+    * [Gemini API](https://ai.google.dev/gemini-api/docs)
+    * [Gemini cookbook](https://github.com/google-gemini/cookbook)
+
+## Authentication
+
+Take a look at [Authentication.ipynb](https://github.com/google-gemini/cookbook/blob/main/quickstarts/Authentication.ipynb) - it expains how to start with Google AI APIs.
+
+Basically, generate new API key in https://aistudio.google.com/app/apikey
+
+The application reads API key from `GOOGLE_AI_APIKEY` environment variable. You might want to modify [start_local-sample.sh](./start_local-sample.sh), put the API key there and save it as [start_local.sh](./start_local.sh)

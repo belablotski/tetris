@@ -1,5 +1,6 @@
-import sys, logging
+import os, sys, logging
 import tkinter as tk
+from tkinter import simpledialog, messagebox
 
 from model import Game
 from view import BoardView
@@ -14,8 +15,20 @@ class App(object):
         self.__root = root
         self.__game_paused = False
         self.__game_over = False
+        self.__copilot_is_active = False
+        self.__google_ai_api_key = None
+        self.__google_ai_api_key_env_var = 'GOOGLE_AI_APIKEY'
+        self.__init_ai()
         self.__init_ui()
         self.__init_mvc()
+
+    def __init_ai(self) -> None:
+        logging.info(f'Reading Google AI API key from {self.__google_ai_api_key_env_var} environment variable...')
+        if self.__google_ai_api_key_env_var in os.environ:
+            self.__google_ai_api_key = os.environ[self.__google_ai_api_key_env_var]
+            logging.info(f'Google AI API key read successfully')
+        else:
+            logging.warning(f'Google AI API key can not be read from {self.__google_ai_api_key_env_var} - not a critical error, but AI co-pilot will not work.')
 
     def __init_ui(self) -> None:
         self.__gameframe_width = self.__board_cols * self.__cell_size_px
@@ -53,10 +66,12 @@ class App(object):
         self.__lineslabel.grid(column=0, row=3)
         self.__lineslabel["textvariable"] = self.__linesvar
         
-        self.__pausebutton = tk.Button(self.__controlframe, text='Pause', command=self.__pause)
-        self.__pausebutton.grid(column=0, row = 4, pady=10)
+        self.__copilotbutton = tk.Button(self.__controlframe, text='AI co-pilot', command=self.__toggle_copilot)
+        self.__copilotbutton.grid(column=0, row = 4, pady=10)
+        self.__pausebutton = tk.Button(self.__controlframe, text='Pause', command=self.__toggle_pause)
+        self.__pausebutton.grid(column=0, row = 5, pady=10)
         self.__restartbutton = tk.Button(self.__controlframe, text='Restart', command=self.__restart)
-        self.__restartbutton.grid(column=0, row = 5)
+        self.__restartbutton.grid(column=0, row = 6, pady=10)
         
         self.__mainframe.pack()
         logging.info('Init UI components - done.')
@@ -65,10 +80,39 @@ class App(object):
         self.__pausable(self.__ctr.push_down)
         self.__root.after(self.__ctr.get_push_down_interval_ms(), self.__push_down_timer)
 
-    def __pause(self) -> None:
+    def __toggle_copilot(self) -> None:
+        self.__copilot_is_active = not self.__copilot_is_active
+        logging.info(f'AI Co-pilot status is {"on" if self.__copilot_is_active else "off"}')
+        try:
+            if self.__copilot_is_active and self.__google_ai_api_key is None:
+                self.__pause(True)
+                try:
+                    ### TODO: remove
+                    messagebox.showinfo('Tetris AI Co-pilot', 'Sorry, this is not fully implemented yet... Please check README.md for the details.')
+                    self.__copilot_is_active = False
+                    return
+                    ###
+                    answer = simpledialog.askstring('Tetris AI Co-pilot', 
+                        f'The Google AI API key is not set in enviroment variable {self.__google_ai_api_key_env_var}. Please enter it here:')
+                    logging.debug(f'Asking for Google API key, answer = {answer}')
+                    if answer:
+                        self.__google_ai_api_key = answer
+                    else:
+                        messagebox.showinfo('Tetris AI Co-pilot', 'Sorry, can not turn on AI co-pilot without Google AI API key. Please check README.md for the details.')
+                        self.__copilot_is_active = False
+                finally:
+                    self.__pause(False)
+        finally:
+            self.__copilotbutton.config(relief="sunken" if self.__copilot_is_active else "raised")
+
+    def __toggle_pause(self) -> None:
         self.__game_paused = not self.__game_paused
         logging.info(f'Pause the game {self.__game_paused}')
         self.__pausebutton.config(relief="sunken" if self.__game_paused else "raised")
+
+    def __pause(self, pause: bool) -> None:
+        if pause != self.__game_paused:
+            self.__toggle_pause()
 
     def __restart(self) -> None:
         self.__game_over = False
