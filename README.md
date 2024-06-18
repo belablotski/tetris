@@ -129,6 +129,9 @@ The same with the [.env-sample](./.env-sample) - if you're thinking of using Jup
 
 # Ideas
 
-1. Multi-turn interactions (see [here](https://github.com/google-gemini/cookbook/blob/main/quickstarts/Prompting.ipynb)). Basically Tetris is nothing else but a char, where the "gravity" makes it move, pushing a piece down every second, and the player is its counterpart.
+1. Multi-turn interactions (see [here](https://github.com/google-gemini/cookbook/blob/main/quickstarts/Prompting.ipynb) and start_chat() [here](https://github.com/google-gemini/cookbook/blob/main/quickstarts/System_instructions.ipynb)). Basically Tetris is nothing else but a char, where the "gravity" makes it move, pushing a piece down every second, and the player is its counterpart.
 2. Add "move left", "move right", etc. as tools in https://github.com/google-gemini/cookbook/blob/main/quickstarts/Function_calling.ipynb
 3. Use multimodel capabilities of Gemini - show it an image of the Tetris board and ask about the next move.
+4. Cascade two questions: where is the best possible place for the next piece? and how to get there?
+5. Cascade "describe the image" prompt with image input with text about the sequence of actions to put the piece in the proper position.
+6. Tune the model with many examples (see [here](https://github.com/google-gemini/cookbook/blob/main/quickstarts/Tuning.ipynb)).
