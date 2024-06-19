@@ -5,6 +5,7 @@ from tkinter import simpledialog, messagebox
 from model import Game
 from view import BoardView
 from controller import Controller
+from copilot import Copilot
 
 class App(object):
     def __init__(self, root: tk.Tk) -> None:
@@ -145,7 +146,10 @@ class App(object):
         self.__root.bind("<Up>", lambda event: self.__pausable(self.__ctr.rotate_clockwise))
         self.__root.bind("<Down>", lambda event: self.__pausable(self.__ctr.rotate_counterclockwise))
         self.__root.bind("<space>", lambda event: self.__pausable(self.__ctr.drop))
-        self.__ctr.start_game()
+
+        self.__copilot = Copilot(self.__ctr)
+
+        self.__ctr.start_game(self.__copilot.build_flight)
 
         self.__root.after(self.__ctr.get_push_down_interval_ms(), self.__push_down_timer)
         logging.info('Init MVC components - done.')
