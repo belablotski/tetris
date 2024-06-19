@@ -81,6 +81,11 @@ class App(object):
         self.__pausable(self.__ctr.push_down)
         self.__root.after(self.__ctr.get_push_down_interval_ms(), self.__push_down_timer)
 
+    def __flight_execution_timer(self) -> None:
+        if self.__copilot_is_active:
+            self.__pausable(self.__copilot.execute_flight)
+        self.__root.after(self.__copilot.get_flight_execution_interval_ms(), self.__flight_execution_timer)
+
     def __toggle_copilot(self) -> None:
         self.__copilot_is_active = not self.__copilot_is_active
         logging.info(f'AI Co-pilot status is {"on" if self.__copilot_is_active else "off"}')
@@ -89,9 +94,9 @@ class App(object):
                 self.__pause(True)
                 try:
                     ### TODO: remove
-                    messagebox.showinfo('Tetris AI Co-pilot', 'Sorry, this is not fully implemented yet... Please check README.md for the details.')
-                    self.__copilot_is_active = False
-                    return
+                    ##messagebox.showinfo('Tetris AI Co-pilot', 'Sorry, this is not fully implemented yet... Please check README.md for the details.')
+                    ##self.__copilot_is_active = False
+                    ##return
                     ###
                     answer = simpledialog.askstring('Tetris AI Co-pilot', 
                         f'The Google AI API key is not set in enviroment variable {self.__google_ai_api_key_env_var}. Please enter it here:')
@@ -130,6 +135,12 @@ class App(object):
 
     def __init_mvc(self) -> None:
         logging.info('Init MVC components...')
+
+        def build_flight() -> None:
+            if self.__copilot_is_active:
+                self.__copilot.build_flight()
+            else:
+                logging.info('No need to build a flight.')
         
         # Model
         game = Game(rows=self.__board_rows, cols=self.__board_cols,
@@ -148,10 +159,11 @@ class App(object):
         self.__root.bind("<space>", lambda event: self.__pausable(self.__ctr.drop))
 
         self.__copilot = Copilot(self.__ctr)
-
-        self.__ctr.start_game(self.__copilot.build_flight)
+        
+        self.__ctr.start_game(build_flight)
 
         self.__root.after(self.__ctr.get_push_down_interval_ms(), self.__push_down_timer)
+        self.__root.after(self.__copilot.get_flight_execution_interval_ms(), self.__flight_execution_timer)
         logging.info('Init MVC components - done.')
 
     def run(self) -> None:
