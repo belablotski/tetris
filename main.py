@@ -99,12 +99,12 @@ class App(object):
                     ##return
                     ###
                     answer = simpledialog.askstring('Tetris AI Co-pilot', 
-                        f'The Google AI API key is not set in enviroment variable {self.__google_ai_api_key_env_var}. Please enter it here:')
+                        f'The Google AI API key is not set in enviroment variable {self.__google_ai_api_key_env_var}. Please enter it here (if you don\'t have one, get it from https://aistudio.google.com/app/apikey):')
                     logging.debug(f'Asking for Google API key, answer = {answer}')
                     if answer:
                         self.__google_ai_api_key = answer
                     else:
-                        messagebox.showinfo('Tetris AI Co-pilot', 'Sorry, can not turn on AI co-pilot without Google AI API key. Please check README.md for the details.')
+                        messagebox.showinfo('Tetris AI Co-pilot', 'Sorry, can not turn on AI co-pilot without Google AI API key (see https://aistudio.google.com/app/apikey). Please check README.md for the details.')
                         self.__copilot_is_active = False
                 finally:
                     self.__pause(False)
@@ -175,7 +175,7 @@ if __name__ == "__main__":
     loghandler = logging.StreamHandler(sys.stdout)
     loghandler.setFormatter(logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s"))
     logging.getLogger().addHandler(loghandler)
-    logging.getLogger().setLevel(logging.DEBUG)
+    logging.getLogger().setLevel(logging.INFO)
     
     logging.info('Starting Tk app...')
 

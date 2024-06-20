@@ -74,10 +74,12 @@ class Controller(object):
         self.__move(self.__figure_rendering.rotate_counterclockwise, False)
 
     def drop(self) -> None:
+        "Down move initiated by user."
         logging.debug('Drop')
         self.__go_down()
 
     def push_down(self) -> None:
+        "Down move initiated by system."
         logging.debug('Push-down')
         self.__go_down()
 
