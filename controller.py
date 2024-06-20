@@ -36,7 +36,7 @@ class Controller(object):
             self.__figure_rendering = FigureRendering(self.__game.get_board(), figure, CellStyles.get_random_style_idx())
             self.__refresh_display()
             if self.__new_figure_callback:
-                self.__new_figure_callback()
+                self.__new_figure_callback(self.__figure_rendering)
         except GameOverException:
             if self.__game_over_callback:
                 self.__game_over_callback()
@@ -81,7 +81,7 @@ class Controller(object):
         logging.debug('Push-down')
         self.__go_down()
 
-    def start_game(self, new_figure_callback: Callable[[], None] = None) -> None:
+    def start_game(self, new_figure_callback: Callable[[FigureRendering], None] = None) -> None:
         self.__new_figure_callback = new_figure_callback
         self.__next_figure()
 

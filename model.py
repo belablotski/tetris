@@ -210,9 +210,9 @@ class Board(object):
     def get_cells(self) -> list[Cell]:
         return self.__cells
     
-    def get_layout(self) -> list[list[bool]]:
+    def get_layout(self, figure_cells: list[Cell] = []) -> list[list[bool]]:
         result = [[False] * self.__cols for _ in range(self.__rows)]
-        for cell in self.__cells:
+        for cell in (self.__cells + figure_cells):
             result[cell.get_row()][cell.get_col()] = True
         return result
     
@@ -244,6 +244,7 @@ class Board(object):
     def reset(self):
         self.__cells = []
 
+# TODO: This class has a lot of state (Figure + its position + Board) and movement functionality, makes sense to split.
 class FigureRendering(object):
     def __init__(self, board: Board, figure: Figure, style_idx: int) -> None:
         super().__init__()
@@ -260,6 +261,12 @@ class FigureRendering(object):
     
     def get_row(self) -> int:
         return self.__row
+    
+    def get_board(self) -> Board:
+        return self.__board
+    
+    def get_figure(self) -> Figure:
+        return self.__figure
     
     def move_left(self) -> None:
         if self.__board.check_fit(self.__figure, self.__row, self.__col - 1):
@@ -294,6 +301,10 @@ class FigureRendering(object):
     def to_cells(self) -> list[Cell]:
         cell_coords = self.__figure.get_current_projection().get_cells_coords()
         return [Cell(self.__row + r, self.__col + c, self.__style_idx) for (r, c) in cell_coords]
+    
+    def get_layout(self) -> list[list[bool]]:
+        "Returns a matrix representation of the well with an inprinted figure in its current position."
+        return self.__board.get_layout(self.to_cells())
 
 # TODO: add game level, auto-increment it after every 10 (or ?) lines.
 class Game(object):

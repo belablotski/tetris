@@ -2,7 +2,7 @@ import os, sys, logging
 import tkinter as tk
 from tkinter import simpledialog, messagebox
 
-from model import Game
+from model import Game, FigureRendering
 from view import BoardView
 from controller import Controller
 from copilot import Copilot
@@ -136,11 +136,11 @@ class App(object):
     def __init_mvc(self) -> None:
         logging.info('Init MVC components...')
 
-        def build_flight() -> None:
+        def build_flight(figure_rendering: FigureRendering) -> None:
             if self.__copilot_is_active:
-                self.__copilot.build_flight()
+                self.__copilot.build_flight(figure_rendering, self.__google_ai_api_key)
             else:
-                logging.info('No need to build a flight.')
+                logging.info('No need to build a flight since co-pilot is off.')
         
         # Model
         game = Game(rows=self.__board_rows, cols=self.__board_cols,
