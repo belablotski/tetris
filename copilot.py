@@ -1,5 +1,5 @@
 import google.generativeai as genai
-import json, logging
+import json, logging, time
 from collections.abc import Callable
 
 from model import FigureRendering
@@ -13,55 +13,54 @@ class Copilot(object):
         self.__flight_ops = []
         self.__current_fligh_op = 0
         self.__model_version = 'models/gemini-1.5-flash-latest'
-        self.__instruction = """You are an expert Tetris player. You will be helping another player to win the game of Tetris.
+        self.__instruction = """You are an expert Tetris player. You will be helping another player to master the game of Tetris.
 
-You will be asked for an advice on what to do with the piece in hands. The tetromino you can move is at the top of the game field.
+You will be asked for an advice on how to deal with a piece in hands. The tetromino that you can move is at the top of the game field.
 
-The game board (also known as "well" or "matrix") has 25 rows and 12 columns. Each cell is binary coded, where 0 means an empty 
-(vacant) cell and 1 means an occupied cell.
+The game board (also known as "well" or "matrix") has 25 rows and 12 columns. Each cell is marked as occupied or vacant.
 
-Your response should be a sequence of actions - what to do with the piece to land it at the desired position, where the piece
-completes some lines or put (if line completion is not feasible) put the piece strategically to make further line completion
-easier. The sequence of actions is the list of allowed actions: "move left", "move right", "rotate clockwise", 
-"rotate counterclockwise", "release".
+Your response should be a sequence of actions - what to do with the piece to land it at the desired position, where the piece completes some lines or put (if line completion is not feasible) the piece strategically to make further line completion easier. 
+
+The sequence of actions is the list of allowed actions: "move left", "move right", "rotate clockwise", "rotate counterclockwise", "release".
 
 For example:
 
-000011100000
-000000100000
-000000000000
-000000000000
-000000000000
-000000000000
-000000000000
-000000000000
-000000000000
-000000000000
-000000000000
-000000000000
-000000000000
-000000000000
-000000000000
-000000000000
-000000000000
-000000000000
-000000000000
-000000000000
-000000000000
-101111111111
-101111111111
-111110111111
-111110111111
+vacant vacant vacant vacant occupied occupied occupied vacant vacant vacant vacant vacant 
+vacant vacant vacant vacant vacant vacant occupied vacant vacant vacant vacant vacant 
+vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant 
+vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant 
+vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant 
+vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant 
+vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant 
+vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant 
+vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant 
+vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant 
+vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant 
+vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant 
+vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant 
+vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant 
+vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant 
+vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant 
+vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant 
+vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant 
+vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant 
+vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant 
+vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant vacant 
+occupied vacant occupied occupied occupied occupied occupied occupied occupied occupied occupied occupied 
+occupied vacant occupied occupied occupied occupied occupied occupied occupied occupied occupied occupied 
+occupied occupied occupied occupied occupied vacant occupied occupied occupied occupied occupied occupied 
+occupied occupied occupied occupied occupied vacant occupied occupied occupied occupied occupied occupied 
 
 The sequence of actions to land the piece will be "rotate counterclockwise", "move left", "move left", "move left", "release".
-The "release" must be the last command since after that the piece just drops down."""
+
+The "release" must be the last command since after that the piece just drops down.
+"""
         self.__model = genai.GenerativeModel(self.__model_version,
                                              system_instruction=self.__instruction,
                                              generation_config={"temperature": 0})
 
     def __ask_ai(self, well_text: str) -> None:
-        prompt = f"""Advise how to land the tetromino currently located at the top (the first row) on the board of 12 cols and 25 rows,
-where 0 represents a free cell and 1 means that the cell is occupied.
+        prompt = f"""Advise how to land the tetromino currently located at the top (at the middle of the first row) on the board of 12 cols and 25 rows, where "vacant" represents a free cell and "occupied" means that the cell is occupied.
 
 {well_text}
 
@@ -73,6 +72,10 @@ list[str]
                                                  generation_config={"response_mime_type": "application/json"})
         logging.debug(f'AI response:{response}')
         logging.info(f'AI response text:{response.text}')
+        with open(time.strftime('%Y%m%d-%H%M%S') + '.log', 'w') as f:
+            f.write(prompt + '\n' + '*' * 100)
+            f.write(str(response) + '\n' + '*' * 100 + '\n')
+            f.write(response.text)
         return response.text
 
     def __parse_ai_response(self, text: str) -> list[Callable[[], None]]:
@@ -106,7 +109,7 @@ list[str]
         logging.info(f'Build flight, calling Google AI with API key {google_ai_api_key[:5]}...')
         assert google_ai_api_key is not None
         well = figure_rendering.get_layout()
-        well_text = '\n'.join([''.join(['1' if cell else '0' for cell in row]) for row in well])
+        well_text = '\n'.join([''.join(['occupied' if cell else 'vacant' for cell in row]) for row in well])
         genai.configure(api_key=google_ai_api_key)
         response_text = self.__ask_ai(well_text)
         self.__flight_ops = self.__parse_ai_response(response_text)
